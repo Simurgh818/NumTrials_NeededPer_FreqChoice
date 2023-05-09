@@ -22,7 +22,12 @@ fnames.root_dir=root_dir;
 fnames.subjectID=sessions{exp_nber,'sub'}{:};
 fnames.task=sessions{exp_nber,'task'}{:};
 fnames.ses=sessions{exp_nber,'ses'}{:};
-fetch_channels(fnames,'patho_channels');
+
+patho_channels=fetch_channels(fnames,'patho_channels');
+contain = 'soz';
+row_path = (patho_channels{:,'feature'});
+soz_rows = contains(row_path, contain);
+soz_channels=patho_channels(soz_rows,["label","feature"]);
 
 %get psd data:
 exp_nber=1;
