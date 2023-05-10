@@ -29,15 +29,28 @@ row_path = (patho_channels{:,'feature'});
 soz_rows = contains(row_path, contain);
 soz_channels=patho_channels(soz_rows,["label","feature"]);
 
-%get psd data:
+%get psd data: TODO - can we just get the soz channels psd?
 exp_nber=1;
-PSD_results=importdata([root_dir '/stg-preproc/sub-' sessions{exp_nber,'sub'}{:} '/task-' sessions{exp_nber,'task'}{:} '/ses-' sessions{exp_nber,'ses'}{:} '/LFP/static_ent/sub-' sessions{exp_nber,'sub'}{:} '_stg-analysis_task-' sessions{exp_nber,'task'}{:} '_ses-' sessions{exp_nber,'ses'}{:} '_nat-psd-refLaplacian.mat']);
+PSD_results=importdata([root_dir '/stg-preproc/sub-' sessions{exp_nber,'sub'}{:}...
+    '/task-' sessions{exp_nber,'task'}{:} '/ses-' sessions{exp_nber,'ses'}{:}...
+    '/LFP/static_ent/sub-' sessions{exp_nber,'sub'}{:} '_stg-analysis_task-'...
+    sessions{exp_nber,'task'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
+    '_nat-psd-refLaplacian.mat']);
 
-%get p-values of fold-change in power for each channel and condition:
-p_value_table=readtable([root_dir '/stg-analyses/task-' sessions{exp_nber,'task'}{:} '/sub-' sessions{exp_nber,'sub'}{:} '/ses-' sessions{exp_nber,'ses'}{:} '/LFP/static_ent/LFP_pvalue_table_refLaplacian.csv'],'VariableNamingRule','preserve','RowNamesColumn',1);
+% get the soz channels PSD
+selected_rows =  contains(PSD_results.label,soz_channels{:,"label"});
+psd_results_soz_ch = {PSD_results.label(selected_rows)};
+
+%get p-values of fold-change in power for each channel and condition: TODO
+%- can we calculate p-value per trial
+p_value_table=readtable([root_dir '/stg-analyses/task-' sessions{exp_nber,'task'}{:}...
+    '/sub-' sessions{exp_nber,'sub'}{:} '/ses-' sessions{exp_nber,'ses'}{:}...
+    '/LFP/static_ent/LFP_pvalue_table_refLaplacian.csv'],'VariableNamingRule',...
+    'preserve','RowNamesColumn',1);
 
 % select the channels with p-value<0.05 for 40 Hz AV (2nd column), for 5.5
 % Hz is column 5 and 80 Hz is column 8
+% TODO: can we see after how many trial each freq had a p<0.05?
 rows = (p_value_table.(2)<0.05);
 p_value_sig_40AV = p_value_table(rows,2);
 
