@@ -30,6 +30,7 @@ soz_rows = contains(row_path, contain);
 soz_channels=patho_channels(soz_rows,["label","feature"]);
 
 %get psd data: TODO - can we just get the soz channels psd?
+% filter based on labels (channels), such that are in soz.
 exp_nber=1;
 PSD_results=importdata([root_dir '/stg-preproc/sub-' sessions{exp_nber,'sub'}{:}...
     '/task-' sessions{exp_nber,'task'}{:} '/ses-' sessions{exp_nber,'ses'}{:}...
@@ -38,8 +39,17 @@ PSD_results=importdata([root_dir '/stg-preproc/sub-' sessions{exp_nber,'sub'}{:}
     '_nat-psd-refLaplacian.mat']);
 
 % get the soz channels PSD
+% selected_rows=cell(size(soz_channels{:,"label"},1),1);
+% psd_results_soz_ch=cell(size(soz_channels{:,"label"},1),1);
+% 
+% for str=1:size(soz_channels{:,"label"},1)
+%     selected_rows =  contains(PSD_results.label,soz_channels{str,"label"});
+%     psd_results_soz_ch(str) = {PSD_results.label(selected_rows)};
+% end
+% psd_results_soz_ch_vertcat = vertcat(psd_results_soz_ch{:});
+% psd_results_soz_ch_mat = unique(psd_results_soz_ch_vertcat);
 selected_rows =  contains(PSD_results.label,soz_channels{:,"label"});
-psd_results_soz_ch = {PSD_results.label(selected_rows)};
+psd_results_soz_ch = PSD_results.label(selected_rows);
 
 %get p-values of fold-change in power for each channel and condition: TODO
 %- can we calculate p-value per trial
@@ -53,6 +63,8 @@ p_value_table=readtable([root_dir '/stg-analyses/task-' sessions{exp_nber,'task'
 % TODO: can we see after how many trial each freq had a p<0.05?
 rows = (p_value_table.(2)<0.05);
 p_value_sig_40AV = p_value_table(rows,2);
+p_value_rows=matches(p_value_sig_40AV.Row,psd_results_soz_ch,'IgnoreCase',true);
+
 
 % check to see after how many trials their p-value became <0.05
 % 
