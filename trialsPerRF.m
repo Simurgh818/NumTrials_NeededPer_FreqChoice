@@ -22,6 +22,7 @@ fnames.root_dir=root_dir;
 fnames.subjectID=sessions{exp_nber,'sub'}{:};
 fnames.task=sessions{exp_nber,'task'}{:};
 fnames.ses=sessions{exp_nber,'ses'}{:};
+fnames.analysis_folder = 'stg-analysis';
 
 patho_channels=fetch_channels(fnames,'patho_channels');
 contain = 'soz';
@@ -32,11 +33,12 @@ soz_channels=patho_channels(soz_rows,["label","feature"]);
 %get psd data: TODO - can we just get the soz channels psd?
 % filter based on labels (channels), such that are in soz.
 exp_nber=1;
-PSD_results=importdata([root_dir 'stg-preproc\sub-' sessions{exp_nber,'sub'}{:}...
+data = [root_dir 'stg-preproc\sub-' sessions{exp_nber,'sub'}{:}...
     '\task-' sessions{exp_nber,'task'}{:} '\ses-' sessions{exp_nber,'ses'}{:}...
     '\LFP\static_ent\sub-' sessions{exp_nber,'sub'}{:} '_stg-analysis_task-'...
     sessions{exp_nber,'task'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
-    '_nat-psd-refLaplacian.mat']);
+    '_nat-psd-refLaplacian.mat'];
+PSD_results=importdata(data);
 
 % get the soz channels PSD
 % selected_rows=cell(size(soz_channels{:,"label"},1),1);

@@ -42,12 +42,15 @@ function evaluate_ent_degree_relpower_perTrial(fnames)
             end
         end
 
-        zscore_table=array2table(zscore_table,'RowNames',PSD_results.label,'VariableNames',conditions_of_interest); %make matrix into table
-        writetable(zscore_table,[fnames.analysis_folder,'/LFP/static_ent/LFP_zscore_table_ref' ref_method{:} '.csv'],'WriteRowNames',1);
-        
-        pvalue_table=array2table(pvalue_table,'RowNames',PSD_results.label,'VariableNames',conditions_of_interest); %make matrix into table
-        writetable(pvalue_table,[fnames.analysis_folder,'/LFP/static_ent/LFP_pvalue_table_ref' ref_method{:} '.csv'],'WriteRowNames',1);
-        
+%         zscore_table=array2table(zscore_table,'RowNames',PSD_results.label,'VariableNames',conditions_of_interest); %make matrix into table
+%         writetable(zscore_table,[fnames.analysis_folder,'/LFP/static_ent/LFP_zscore_table_ref' ref_method{:} '.csv'],'WriteRowNames',1);
+%         
+%         pvalue_table=array2table(pvalue_table,'RowNames',PSD_results.label,'VariableNames',conditions_of_interest); %make matrix into table
+%         writetable(pvalue_table,[fnames.analysis_folder,'/LFP/static_ent/LFP_pvalue_table_ref' ref_method{:} '.csv'],'WriteRowNames',1);
+%        
+        pvalue_trial_table=array2table(pvalue_trial_table,'RowNames',PSD_results.label,'VariableNames',conditions_of_interest); %make matrix into table
+        writetable(pvalue_trial_table,[fnames.analysis_folder,'/LFP/static_ent/LFP_pvalue_trial_table_ref' ref_method{:} '.csv'],'WriteRowNames',1);
+       
         clear PSD_results_ref_preproc PSD_results;
     end
 end
