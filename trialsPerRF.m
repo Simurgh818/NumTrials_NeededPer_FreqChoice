@@ -77,7 +77,7 @@ conditions_of_interest = {'40Hz-AV'};
 num_trials=size(PSD_results.data{1,10}{1,1},1);
 zscore_table=zeros(length(PSD_results.label),length(conditions_of_interest));
 pvalue_table=zeros(length(PSD_results.label),length(conditions_of_interest));
-pvalue_trial_table=zeros(length(PSD_results.label),length(conditions_of_interest),length(num_trials));
+pvalue_trial_table=zeros(length(PSD_results.label),length(num_trials));
 % for i=1:size(zscore_table,2) %for each condition
 % 
 %     freq_interest=str2num(regexprep(conditions_of_interest{i},'Hz.+',''));
@@ -94,10 +94,10 @@ pvalue_trial_table=zeros(length(PSD_results.label),length(conditions_of_interest
 
             stim_values=[stim_values current_stim_value];
             baseline_values=[baseline_values current_baseline_value];
-            pvalue_trial_table(ch,1,tr)=pval_randomshuffle([stim_values' baseline_values'],10000);
+            pvalue_trial_table(ch,tr)=pval_randomshuffle([stim_values' baseline_values'],1000);
         end
         zscore_table(ch,1)=(mean(stim_values)/mean(baseline_values))-1;
-        pvalue_table(ch,1)=pval_randomshuffle([stim_values' baseline_values'],10000);
+        pvalue_table(ch,1)=pval_randomshuffle([stim_values' baseline_values'],1000);
     end
 % end
 
@@ -107,6 +107,6 @@ pvalue_trial_table=zeros(length(PSD_results.label),length(conditions_of_interest
 %         pvalue_table=array2table(pvalue_table,'RowNames',PSD_results.label,'VariableNames',conditions_of_interest); %make matrix into table
 %         writetable(pvalue_table,[fnames.analysis_folder,'/LFP/static_ent/LFP_pvalue_table_ref' ref_method{:} '.csv'],'WriteRowNames',1);
 %        
-pvalue_trial_table=array2table(pvalue_trial_table(:,1,:),'RowNames',PSD_results.label,'VariableNames',conditions_of_interest); %make matrix into table
+pvalue_trial_table=array2table(pvalue_trial_table,'RowNames',PSD_results.label,'VariableNames',conditions_of_interest); %make matrix into table
 writetable(pvalue_trial_table,[fnames.analysis_folder,'/LFP/static_ent/LFP_pvalue_trial_table_ref' ref_method{:} '.csv'],'WriteRowNames',1);
        
