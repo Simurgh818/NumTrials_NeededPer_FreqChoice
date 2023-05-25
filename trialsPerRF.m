@@ -67,7 +67,15 @@ rows = (p_value_table.(2)<0.05);
 p_value_sig_40AV = p_value_table(rows,2);
 p_value_rows=matches(p_value_sig_40AV.Row,psd_results_soz_ch,'IgnoreCase',true);
 p_value_sig_40AV_soz = p_value_sig_40AV(p_value_rows,:);
-p_value_sig_40AV_soz_chs = p_value_sig_40AV_soz.Row;
+p_value_sig_40AV_soz_chs = p_value_sig_40AV_soz.Row(:);
+
+% find the index of PSD_results.labels that corespond to the chs with
+% significant p-values in soz
+
+
+selected_PSD_result_chs = matches(PSD_results.label,p_value_sig_40AV_soz_chs(:));
+PSD_results_label_sig_soz_chs = PSD_results.label(selected_PSD_result_chs);
+idx_PSD_results_label_sig_soz_ch = find(selected_PSD_result_chs);
 
 % check to see after how many trials their p-value became <0.05
 % 
@@ -76,16 +84,18 @@ p_value_sig_40AV_soz_chs = p_value_sig_40AV_soz.Row;
 control_condition='Baseline';
 conditions_of_interest = {'40Hz-AV'};
 num_trials=size(PSD_results.data{1,10}{1,1},1);
-zscore_table=zeros(length(PSD_results.label),length(conditions_of_interest));
-pvalue_table=zeros(length(PSD_results.label),length(conditions_of_interest));
-pvalue_trial:size(zscore_table,1) %for each channel=zeros(length(PSD_results.label),length(num_trials));
+% zscore_table=zeros(length(PSD_results.label),length(conditions_of_interest));
+% pvalue_table=zeros(length(PSD_results.label),length(conditions_of_interest));
+pvalue_trial=zeros(size(p_value_sig_40AV_soz_chs,1),num_trials); %for each channel=zeros(length(PSD_results.label),length(num_trials));
 % for i=1:size(zscore_table,2) %for each condition
 % 
 %     freq_interest=str2num(regexprep(conditions_of_interest{i},'Hz.+',''));
 %     [~,temp]=min(abs(PSD_results.data{1,strcmp(PSD_results.condition,conditions_of_interest{i})}{3}-freq_interest)); %find index of frequency closest to frequency of interest- have to do this because sample rate of EDF file not an integer sometimes (error with Natus)
 %     freq_interest_index=temp;
-    
-for ch=76
+i =1;   
+for ch = idx_PSD_results_label_sig_soz_ch(1):idx_PSD_results_label_sig_soz_ch(end)
+    disp(ch)
+   
     stim_values=[];
     baseline_values=[];
     
@@ -95,10 +105,11 @@ for ch=76
 
         stim_values=[stim_values current_stim_value];
         baseline_values=[baseline_values current_baseline_value];
-        pvalue_trial(ch,tr)=pval_randomshuffle([stim_values' baseline_values'],500);
+        pvalue_trial(i,tr)=pval_randomshuffle([stim_values' baseline_values'],500);
     end
-    zscore_table(ch,1)=(mean(stim_values)/mean(baseline_values))-1;
-    pvalue_table(ch,1)=pval_randomshuffle([stim_values' baseline_values'],500);
+    i = i + 1;
+%     zscore_table(ch,1)=(mean(stim_values)/mean(baseline_values))-1;
+%     pvalue_table(ch,1)=pval_randomshuffle([stim_values' baseline_values'],500);
 end
 
 % end
@@ -112,7 +123,7 @@ end
 trial(1:num_trials)="trial ";
 num = string(1:num_trials);
 trial_names=append(trial,num);
-pvalue_trial_table=array2table(pvalue_trial,'RowNames',PSD_results.label,'VariableNames', trial_names); %make matrix into table
+pvalue_trial_table=array2table(pvalue_trial,'RowNames',p_value_sig_40AV_soz_chs(:),'VariableNames', trial_names); %make matrix into table
 p_value_sig_40AV_soz_chs_trials = pvalue_trial_table(p_value_sig_40AV_soz_chs,:);
 
 
