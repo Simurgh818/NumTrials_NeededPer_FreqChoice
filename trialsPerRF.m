@@ -126,6 +126,11 @@ trial_names=append(trial,num);
 pvalue_trial_table=array2table(pvalue_trial,'RowNames',p_value_sig_40AV_soz_chs(:),'VariableNames', trial_names); %make matrix into table
 p_value_sig_40AV_soz_chs_trials = pvalue_trial_table(p_value_sig_40AV_soz_chs,:);
 
-
+% plot
+plot(1:num_trials, pvalue_trial)
+legend(p_value_sig_40AV_soz_chs)
+title(conditions_of_interest)
+xlabel("number of trials")
+ylabel("p-value")
 % writetable(pvalue_trial_table,[fnames.analysis_folder,'/LFP/static_ent/LFP_pvalue_trial_table_refLaplacian.csv'],'WriteRowNames',1);
        
