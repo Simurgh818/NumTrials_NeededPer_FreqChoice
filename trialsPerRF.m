@@ -4,7 +4,8 @@
 % We will see after how many trials a frequency choice resulted in
 % significant (p<0.5) power fold change in a channel in seizure onset zone
 % channel. 
-
+clear
+%% set up where the dataset is and folder structure for sessions
 
 %define root dir (where project data is) and sessions of interest:
 root_dir='Y:\';
@@ -24,13 +25,35 @@ fnames.task=sessions{exp_nber,'task'}{:};
 fnames.ses=sessions{exp_nber,'ses'}{:};
 fnames.analysis_folder = 'stg-analysis';
 
+%% Import the LFP PSD Laplacian refernced data for the channels
+
+%get psd data: TODO - can we just get the soz channels psd?
+% filter based on labels (channels), such that are in soz.
+exp_nber=1;
+data = [root_dir 'stg-preproc\sub-' sessions{exp_nber,'sub'}{:}...
+    '\task-' sessions{exp_nber,'task'}{:} '\ses-' sessions{exp_nber,'ses'}{:}...
+    '\LFP\static_ent\sub-' sessions{exp_nber,'sub'}{:} '_stg-analysis_task-'...
+    sessions{exp_nber,'task'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
+    '_nat-psd-refLaplacian.mat'];
+PSD_results=importdata(data);
+
+% myVars ="label";
+% PSD_results2 = importdata(data,myVars);
+% selected_rows =  contains(PSD_results2.label,soz_channels{:,"label"});
+% psd_results_soz_ch = PSD_results2.label(selected_rows); 
+
+
+%% Get SOZ channels with p-values < 0.05
+
 patho_channels=fetch_channels(fnames,'patho_channels');
 contain = 'soz';
 row_path = (patho_channels{:,'feature'});
 soz_rows = contains(row_path, contain);
 soz_channels=patho_channels(soz_rows,["label","feature"]);
 
-
+% get the soz channels PSD
+selected_rows =  contains(PSD_results.label,soz_channels{:,"label"});
+psd_results_soz_ch = PSD_results.label(selected_rows);
 
 %get p-values of fold-change in power for each channel and condition: TODO
 %- can we calculate p-value per trial
@@ -48,34 +71,12 @@ p_value_rows=matches(p_value_sig_40AV.Row,psd_results_soz_ch,'IgnoreCase',true);
 p_value_sig_40AV_soz = p_value_sig_40AV(p_value_rows,:);
 p_value_sig_40AV_soz_chs = p_value_sig_40AV_soz.Row(:);
 
-%get psd data: TODO - can we just get the soz channels psd?
-% filter based on labels (channels), such that are in soz.
-exp_nber=1;
-data = [root_dir 'stg-preproc\sub-' sessions{exp_nber,'sub'}{:}...
-    '\task-' sessions{exp_nber,'task'}{:} '\ses-' sessions{exp_nber,'ses'}{:}...
-    '\LFP\static_ent\sub-' sessions{exp_nber,'sub'}{:} '_stg-analysis_task-'...
-    sessions{exp_nber,'task'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
-    '_nat-psd-refLaplacian.mat'];
-PSD_results=importdata(data);
-
-% get the soz channels PSD
-% selected_rows=cell(size(soz_channels{:,"label"},1),1);
-% psd_results_soz_ch=cell(size(soz_channels{:,"label"},1),1);
-% 
-% for str=1:size(soz_channels{:,"label"},1)
-%     selected_rows =  contains(PSD_results.label,soz_channels{str,"label"});
-%     psd_results_soz_ch(str) = {PSD_results.label(selected_rows)};
-% end
-% psd_results_soz_ch_vertcat = vertcat(psd_results_soz_ch{:});
-% psd_results_soz_ch_mat = unique(psd_results_soz_ch_vertcat);
-selected_rows =  contains(PSD_results.label,soz_channels{:,"label"});
-psd_results_soz_ch = PSD_results.label(selected_rows);
-
 % find the index of PSD_results.labels that corespond to the chs with
 % significant p-values in soz
 selected_PSD_result_chs = matches(PSD_results.label,p_value_sig_40AV_soz_chs(:));
 PSD_results_label_sig_soz_chs = PSD_results.label(selected_PSD_result_chs);
 idx_PSD_results_label_sig_soz_ch = find(selected_PSD_result_chs);
+%% Nested loops to go through session's conditions and for each channel calculate the p-value for each trial
 
 % check to see after how many trials their p-value became <0.05
 % 
