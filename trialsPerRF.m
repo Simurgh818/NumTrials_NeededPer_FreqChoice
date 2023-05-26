@@ -30,6 +30,24 @@ row_path = (patho_channels{:,'feature'});
 soz_rows = contains(row_path, contain);
 soz_channels=patho_channels(soz_rows,["label","feature"]);
 
+
+
+%get p-values of fold-change in power for each channel and condition: TODO
+%- can we calculate p-value per trial
+p_value_table=readtable([root_dir 'stg-analyses\task-' sessions{exp_nber,'task'}{:}...
+    '\sub-' sessions{exp_nber,'sub'}{:} '\ses-' sessions{exp_nber,'ses'}{:}...
+    '\LFP\static_ent\LFP_pvalue_table_refLaplacian.csv'],'VariableNamingRule',...
+    'preserve','RowNamesColumn',1);
+
+% select the channels with p-value<0.05 for 40 Hz AV (2nd column), for 5.5
+% Hz is column 5 and 80 Hz is column 8
+% TODO: can we see after how many trial each freq had a p<0.05?
+rows = (p_value_table.(2)<0.05);
+p_value_sig_40AV = p_value_table(rows,2);
+p_value_rows=matches(p_value_sig_40AV.Row,psd_results_soz_ch,'IgnoreCase',true);
+p_value_sig_40AV_soz = p_value_sig_40AV(p_value_rows,:);
+p_value_sig_40AV_soz_chs = p_value_sig_40AV_soz.Row(:);
+
 %get psd data: TODO - can we just get the soz channels psd?
 % filter based on labels (channels), such that are in soz.
 exp_nber=1;
@@ -53,26 +71,8 @@ PSD_results=importdata(data);
 selected_rows =  contains(PSD_results.label,soz_channels{:,"label"});
 psd_results_soz_ch = PSD_results.label(selected_rows);
 
-%get p-values of fold-change in power for each channel and condition: TODO
-%- can we calculate p-value per trial
-p_value_table=readtable([root_dir 'stg-analyses\task-' sessions{exp_nber,'task'}{:}...
-    '\sub-' sessions{exp_nber,'sub'}{:} '\ses-' sessions{exp_nber,'ses'}{:}...
-    '\LFP\static_ent\LFP_pvalue_table_refLaplacian.csv'],'VariableNamingRule',...
-    'preserve','RowNamesColumn',1);
-
-% select the channels with p-value<0.05 for 40 Hz AV (2nd column), for 5.5
-% Hz is column 5 and 80 Hz is column 8
-% TODO: can we see after how many trial each freq had a p<0.05?
-rows = (p_value_table.(2)<0.05);
-p_value_sig_40AV = p_value_table(rows,2);
-p_value_rows=matches(p_value_sig_40AV.Row,psd_results_soz_ch,'IgnoreCase',true);
-p_value_sig_40AV_soz = p_value_sig_40AV(p_value_rows,:);
-p_value_sig_40AV_soz_chs = p_value_sig_40AV_soz.Row(:);
-
 % find the index of PSD_results.labels that corespond to the chs with
 % significant p-values in soz
-
-
 selected_PSD_result_chs = matches(PSD_results.label,p_value_sig_40AV_soz_chs(:));
 PSD_results_label_sig_soz_chs = PSD_results.label(selected_PSD_result_chs);
 idx_PSD_results_label_sig_soz_ch = find(selected_PSD_result_chs);
