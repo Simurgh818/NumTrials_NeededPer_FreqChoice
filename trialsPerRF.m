@@ -74,9 +74,9 @@ control_condition='Baseline';
 num_trials=size(PSD_results.data{1,10}{1,1},1);
 % zscore_table=zeros(length(PSD_results.label),length(conditions_of_interest));
 % pvalue_table=zeros(length(PSD_results.label),length(conditions_of_interest));
-pvalue_trial=zeros(size(conditions_of_interest,1),size(p_value_sig_40AV_soz_chs,1),num_trials); %for each channel=zeros(length(PSD_results.label),length(num_trials));
+%for each channel=zeros(length(PSD_results.label),length(num_trials));
 for con=1:size(conditions_of_interest,2) %for each condition
-
+    pvalue_trial=zeros(size(p_value_sig_40AV_soz_chs,1),num_trials); 
 %     freq_interest=str2num(regexprep(conditions_of_interest{i},'Hz.+',''));
     freq_interest_boolean=strcmp(PSD_results.condition,conditions_of_interest{i}); %find index of frequency closest to frequency of interest- have to do this because sample rate of EDF file not an integer sometimes (error with Natus)
     freq_interest_index=find(freq_interest_boolean);
@@ -110,7 +110,7 @@ for con=1:size(conditions_of_interest,2) %for each condition
     
             stim_values=[stim_values current_stim_value];
             baseline_values=[baseline_values current_baseline_value];
-            pvalue_trial(con,i,tr)=pval_randomshuffle([stim_values' baseline_values'],500);
+            pvalue_trial(i,tr)=pval_randomshuffle([stim_values' baseline_values'],500);
         end
         i = i + 1;
     %     zscore_table(ch,1)=(mean(stim_values)/mean(baseline_values))-1;
@@ -119,13 +119,14 @@ for con=1:size(conditions_of_interest,2) %for each condition
     trial(1:num_trials)="trial ";
     num = string(1:num_trials);
     trial_names=append(trial,num);
-    pvalue_trial_con = pvalue_trial(con,:,:);
-    pvalue_trial_table=array2table(pvalue_trial_con,'RowNames',p_value_sig_condition_of_interest_soz_chs(:),'VariableNames', trial_names); %make matrix into table
+%     pvalue_trial_con = pvalue_trial(con,:,:);
+    pvalue_trial_table=array2table(pvalue_trial,'RowNames',p_value_sig_condition_of_interest_soz_chs(:),'VariableNames', trial_names); %make matrix into table
     p_value_sig_condition_of_interest_soz_chs_trials = pvalue_trial_table(p_value_sig_condition_of_interest_soz_chs,:);
     
     % plot
+    figure(con)
     plot(1:num_trials, pvalue_trial)
-    legend(p_value_sig_40AV_soz_chs)
+    legend(p_value_sig_condition_of_interest_soz_chs)
     title(conditions_of_interest)
     xlabel("number of trials")
     ylabel("p-value")
