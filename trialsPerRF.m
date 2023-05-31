@@ -76,21 +76,22 @@ num_trials=size(PSD_results.data{1,10}{1,1},1);
 % pvalue_table=zeros(length(PSD_results.label),length(conditions_of_interest));
 %for each channel=zeros(length(PSD_results.label),length(num_trials));
 for con=1:size(conditions_of_interest,2) %for each condition
-    pvalue_trial=zeros(size(p_value_sig_40AV_soz_chs,1),num_trials); 
+    
 %     freq_interest=str2num(regexprep(conditions_of_interest{i},'Hz.+',''));
-    freq_interest_boolean=strcmp(PSD_results.condition,conditions_of_interest{i}); %find index of frequency closest to frequency of interest- have to do this because sample rate of EDF file not an integer sometimes (error with Natus)
+    freq_interest_boolean=strcmp(PSD_results.condition,conditions_of_interest{con}); %find index of frequency closest to frequency of interest- have to do this because sample rate of EDF file not an integer sometimes (error with Natus)
     freq_interest_index=find(freq_interest_boolean);
 
     % select the channels with p-value<0.05 for 40 Hz AV (2nd column), for 5.5
     % Hz is column 5 and 80 Hz is column 8
     % TODO: can we see after how many trial each freq had a p<0.05?
-    freq_interest_pvalue_idx = find(strcmp(p_value_table.Properties.VariableNames,conditions_of_interest{i}));
+    freq_interest_pvalue_idx = find(strcmp(p_value_table.Properties.VariableNames,conditions_of_interest{con}));
     rows = (p_value_table.(freq_interest_pvalue_idx)<0.05);
     p_value_sig_condition_of_interest = p_value_table(rows,freq_interest_pvalue_idx);
     p_value_rows=matches(p_value_sig_condition_of_interest.Row,psd_results_soz_ch,'IgnoreCase',true);
     p_value_sig_condition_of_interest_soz = p_value_sig_condition_of_interest(p_value_rows,:);
     p_value_sig_condition_of_interest_soz_chs = p_value_sig_condition_of_interest_soz.Row(:);
-    
+    pvalue_trial=zeros(size(p_value_sig_condition_of_interest_soz_chs,1),num_trials); 
+
     % find the index of PSD_results.labels that corespond to the chs with
     % significant p-values in soz
     selected_PSD_result_chs = matches(PSD_results.label,p_value_sig_condition_of_interest_soz_chs(:));
@@ -98,19 +99,19 @@ for con=1:size(conditions_of_interest,2) %for each condition
     idx_PSD_results_label_sig_soz_ch = find(selected_PSD_result_chs);
 
     i =1;   
-    for ch = idx_PSD_results_label_sig_soz_ch(1):idx_PSD_results_label_sig_soz_ch(end)
+    for ch = size(PSD_results_label_sig_soz_chs,1)
     %     disp(ch)
        
         stim_values=[];
         baseline_values=[];
         
         for tr=1:num_trials %for however many number of trials of given condition there are
-            current_stim_value=PSD_results.data{ch,freq_interest_index}{1,1}(tr,:);
-            current_baseline_value=PSD_results.data{ch,2}{1,1}(tr,:);
+            current_stim_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),freq_interest_index}{1,1}(tr,:);
+            current_baseline_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),2}{1,1}(tr,:);
     
             stim_values=[stim_values current_stim_value];
             baseline_values=[baseline_values current_baseline_value];
-            pvalue_trial(i,tr)=pval_randomshuffle([stim_values' baseline_values'],500);
+            pvalue_trial(i,tr)=pval_randomshuffle([stim_values' baseline_values'],1000);
         end
         i = i + 1;
     %     zscore_table(ch,1)=(mean(stim_values)/mean(baseline_values))-1;
@@ -127,7 +128,7 @@ for con=1:size(conditions_of_interest,2) %for each condition
     figure(con)
     plot(1:num_trials, pvalue_trial)
     legend(p_value_sig_condition_of_interest_soz_chs)
-    title(conditions_of_interest)
+    title(conditions_of_interest{con})
     xlabel("number of trials")
     ylabel("p-value")
 
