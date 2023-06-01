@@ -27,9 +27,6 @@ for exp_nber=1:1 % size(p_values.ses,1)
     fnames.analysis_folder = 'stg-analysis';
     
     %% Import the LFP PSD Laplacian refernced data for the channels
-    
-    %get psd data: TODO - can we just get the soz channels psd?
-    % filter based on labels (channels), such that are in soz.
 
     data = [root_dir 'stg-preproc\sub-' sessions{exp_nber,'sub'}{:}...
         '\task-' sessions{exp_nber,'task'}{:} '\ses-' sessions{exp_nber,'ses'}{:}...
@@ -37,12 +34,6 @@ for exp_nber=1:1 % size(p_values.ses,1)
         sessions{exp_nber,'task'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
         '_nat-psd-refLaplacian.mat'];
     PSD_results=importdata(data);
-    
-    % myVars ="label";
-    % PSD_results2 = importdata(data,myVars);
-    % selected_rows =  contains(PSD_results2.label,soz_channels{:,"label"});
-    % psd_results_soz_ch = PSD_results2.label(selected_rows); 
-    
     
     %% Get SOZ channels with p-values < 0.05
     
@@ -74,22 +65,20 @@ for exp_nber=1:1 % size(p_values.ses,1)
     control_condition='Baseline';
     % conditions_of_interest = {'40Hz-AV'};
     num_trials=size(PSD_results.data{1,10}{1,1},1);
-    % zscore_table=zeros(length(PSD_results.label),length(conditions_of_interest));
-    % pvalue_table=zeros(length(PSD_results.label),length(conditions_of_interest));
-    %for each channel=zeros(length(PSD_results.label),length(num_trials));
+
+    p_values.channels = {};
     for con=1:size(conditions_of_interest,2) %for each condition
-        %TODO: for each condition: join session and condition info into a
+        %for each condition: join session and condition info into a
         %cell variable
-        p_values.conditions(1,con) = {join([p_values.ses{exp_nber},'_',conditions_of_interest{con}],2)};
-    %     freq_interest=str2num(regexprep(conditions_of_interest{i},'Hz.+',''));
+        p_values.conditions(con) = {join([p_values.ses{exp_nber},'_',conditions_of_interest{con}],2)};
         freq_interest_boolean=strcmp(PSD_results.condition,conditions_of_interest{con}); %find index of frequency closest to frequency of interest- have to do this because sample rate of EDF file not an integer sometimes (error with Natus)
         freq_interest_index=find(freq_interest_boolean);
     
         % select the channels with p-value<0.05 for 40 Hz AV (2nd column), for 5.5
         % Hz is column 5 and 80 Hz is column 8
-        % TODO: can we see after how many trial each freq had a p<0.05?
+       
         freq_interest_pvalue_idx = find(strcmp(p_value_table.Properties.VariableNames,conditions_of_interest{con}));
-        rows = (p_value_table.(freq_interest_pvalue_idx)<0.05);
+        rows = (p_value_table.(freq_interest_pvalue_idx)<0.05); % after how many trial each freq had a p<0.05
         p_value_sig_condition_of_interest = p_value_table(rows,freq_interest_pvalue_idx);
         p_value_rows=matches(p_value_sig_condition_of_interest.Row,psd_results_soz_ch,'IgnoreCase',true);
         p_value_sig_condition_of_interest_soz = p_value_sig_condition_of_interest(p_value_rows,:);
@@ -101,11 +90,13 @@ for exp_nber=1:1 % size(p_values.ses,1)
         selected_PSD_result_chs = matches(PSD_results.label,p_value_sig_condition_of_interest_soz_chs(:));
         PSD_results_label_sig_soz_chs = PSD_results.label(selected_PSD_result_chs);
         idx_PSD_results_label_sig_soz_ch = find(selected_PSD_result_chs);
-        p_values.conditions{2,con} = PSD_results_label_sig_soz_chs;
-%         i =1;   
-        for ch = size(PSD_results_label_sig_soz_chs,1)
-        %     disp(ch)
-%             p_values.conditions{2,con}{ch,1} = PSD_results_label_sig_soz_chs(ch);
+        channels(1: size(PSD_results_label_sig_soz_chs,1),1) = {p_values.conditions(con)};
+%         p_values.channels = {zeros(size(p_value_sig_condition_of_interest_soz_chs,1),num_trials+1)};
+        
+
+        for ch = 1:size(PSD_results_label_sig_soz_chs,1)
+%             disp(ch)
+            p_values.channels{end+1,1} = {strjoin([channels{:},PSD_results_label_sig_soz_chs{:}],'_')};
             stim_values=[];
             baseline_values=[];
             
@@ -118,25 +109,19 @@ for exp_nber=1:1 % size(p_values.ses,1)
                 pvalue_trial(ch,tr)=pval_randomshuffle([stim_values' baseline_values'],1000);
                 
             end
-            p_values.conditions{2,con}{ch,2}=pvalue_trial;
-%             i = i + 1;
-        %     zscore_table(ch,1)=(mean(stim_values)/mean(baseline_values))-1;
-        %     pvalue_table(ch,1)=pval_randomshuffle([stim_values' baseline_values'],500);
+            
         end
+        
+        p_values.channels{end+1,2:num_trials+1}=pvalue_trial;
         trial(1:num_trials)="trial ";
         num = string(1:num_trials);
         trial_names=append(trial,num);
     %     pvalue_trial_con = pvalue_trial(con,:,:);
-        pvalue_trial_table=array2table(pvalue_trial,'RowNames',p_value_sig_condition_of_interest_soz_chs(:),'VariableNames', trial_names); %make matrix into table
-        p_value_sig_condition_of_interest_soz_chs_trials = pvalue_trial_table(p_value_sig_condition_of_interest_soz_chs,:);
-        
+%         pvalue_trial_table=array2table(pvalue_trial,'RowNames',p_value_sig_condition_of_interest_soz_chs(:),'VariableNames', trial_names); %make matrix into table
+%         p_value_sig_condition_of_interest_soz_chs_trials = p_values.channels{ch,:};
+%         p_values.conditions{2,con}{ch}=pvalue_trial;
         % plot
-        figure(con)
-        plot(1:num_trials, pvalue_trial)
-        legend(p_value_sig_condition_of_interest_soz_chs)
-        title(conditions_of_interest{con})
-        xlabel("number of trials")
-        ylabel("p-value")
+   
     
     end
     %% Save session csv and plot
@@ -146,7 +131,16 @@ for exp_nber=1:1 % size(p_values.ses,1)
 %         pvalue_table=array2table(pvalue_table,'RowNames',PSD_results.label,'VariableNames',conditions_of_interest); %make matrix into table
 %         writetable(pvalue_table,[fnames.analysis_folder,'/LFP/static_ent/LFP_pvalue_table_ref' ref_method{:} '.csv'],'WriteRowNames',1);
 %    
-    colNames = {p_values.ses{exp_nber},p_values.conditions{1,:}};
+    figure("Name",p_values.ses{exp_nber})
+    pvalues_trial= cell2mat(p_values.channels(:,2:end));
+    plot(1:num_trials, pvalues_trial)
+    leg = string(p_values.channels(:,1));
+    legend(leg);
+    title(p_values.ses{exp_nber})
+    xlabel("number of trials")
+    ylabel("p-value")
+
+    colNames = {p_values.conditions(1,:)};
 end
 
 
