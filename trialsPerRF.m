@@ -83,7 +83,7 @@ for exp_nber=1:1 % size(p_values.ses,1)
         p_value_rows=matches(p_value_sig_condition_of_interest.Row,psd_results_soz_ch,'IgnoreCase',true);
         p_value_sig_condition_of_interest_soz = p_value_sig_condition_of_interest(p_value_rows,:);
         p_value_sig_condition_of_interest_soz_chs = p_value_sig_condition_of_interest_soz.Row(:);
-        pvalue_trial={zeros(size(p_value_sig_condition_of_interest_soz_chs,1),num_trials)}; 
+        pvalue_trial={zeros(size(p_value_sig_condition_of_interest_soz_chs,1),10,num_trials)}; 
     
         % find the index of PSD_results.labels that corespond to the chs with
         % significant p-values in soz
@@ -96,18 +96,22 @@ for exp_nber=1:1 % size(p_values.ses,1)
 
         for ch = 1:size(PSD_results_label_sig_soz_chs,1)
 %             disp(ch)
-            p_values.channels{end+1,1} = {strjoin([channels{ch},PSD_results_label_sig_soz_chs{ch}],'_')};
+            p_values.channels{end+1,1,1} = {strjoin([channels{ch},PSD_results_label_sig_soz_chs{ch}],'_')};
             stim_values=[];
             baseline_values=[];
+            for iteration=1:10
+
+                trial_order= randperm(num_trials);
+                for tr=trial_order %for however many number of trials of given condition there are
+                    
+                    current_stim_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),freq_interest_index}{1,1}(tr,:);
+                    current_baseline_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),2}{1,1}(tr,:);
             
-            for tr=1:num_trials %for however many number of trials of given condition there are
-                current_stim_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),freq_interest_index}{1,1}(tr,:);
-                current_baseline_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),2}{1,1}(tr,:);
-        
-                stim_values=[stim_values current_stim_value];
-                baseline_values=[baseline_values current_baseline_value];
-                pvalue_trial{ch,tr}=pval_randomshuffle([stim_values' baseline_values'],1000);
-                p_values.channels{end,tr+1}=pvalue_trial{ch,tr};
+                    stim_values=[stim_values current_stim_value];
+                    baseline_values=[baseline_values current_baseline_value];
+                    pvalue_trial{ch,iteration,tr}=pval_randomshuffle([stim_values' baseline_values'],1000);
+                    p_values.channels{end,iteration,tr+1}=pvalue_trial{ch,iteration,tr};
+                end
             end
 %             pvalue_trial_cell = num2cell(pvalue_trial);
 %             p_values.channels{end,2:num_trials+1}= pvalue_trial_cell;
@@ -136,13 +140,18 @@ for exp_nber=1:1 % size(p_values.ses,1)
     colNames = {};
     colNames = {['channel'; trial_names']};
     p_values_table = cell2table(p_values.channels, "VariableNames", colNames{:});
+%     Make a new subfolder or completely different folder, save per session
     file_path = [root_dir 'stg-analyses\task-' sessions{exp_nber,'task'}{:}...
         '\sub-' sessions{exp_nber,'sub'}{:} '\ses-' sessions{exp_nber,'ses'}{:}...
         ,'\LFP\static_ent\LFP_pvalue_trial_table_refLaplacian.csv'];
     writetable(p_values_table,file_path,'WriteRowNames',1);
-    
+    % PSD plots condition vs. baseline
+
 end
 
-
-
+figure
+plot_PSD('80Hz-AV','1Ld5-1Ld4/1Ld6',PSD_results,PSD_results.label,PSD_results.condition,condition_color('80Hz-AV'),0,1,1)% the 0 is for std dev 
+hold on;
+plot_PSD('Baseline','1Ld5-1Ld4/1Ld6',PSD_results,PSD_results.label,PSD_results.condition,[0 0 0],1,0,1)
+hold off;
        
