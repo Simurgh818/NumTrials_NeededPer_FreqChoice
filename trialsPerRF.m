@@ -83,7 +83,7 @@ for exp_nber=1:1 % size(p_values.ses,1)
         p_value_rows=matches(p_value_sig_condition_of_interest.Row,psd_results_soz_ch,'IgnoreCase',true);
         p_value_sig_condition_of_interest_soz = p_value_sig_condition_of_interest(p_value_rows,:);
         p_value_sig_condition_of_interest_soz_chs = p_value_sig_condition_of_interest_soz.Row(:);
-        pvalue_trial=zeros(size(p_value_sig_condition_of_interest_soz_chs,1),num_trials); 
+        pvalue_trial={zeros(size(p_value_sig_condition_of_interest_soz_chs,1),num_trials)}; 
     
         % find the index of PSD_results.labels that corespond to the chs with
         % significant p-values in soz
@@ -96,7 +96,7 @@ for exp_nber=1:1 % size(p_values.ses,1)
 
         for ch = 1:size(PSD_results_label_sig_soz_chs,1)
 %             disp(ch)
-            p_values.channels{end+1,1} = {strjoin([channels{:},PSD_results_label_sig_soz_chs{:}],'_')};
+            p_values.channels{end+1,1} = {strjoin([channels{ch},PSD_results_label_sig_soz_chs{ch}],'_')};
             stim_values=[];
             baseline_values=[];
             
@@ -106,13 +106,14 @@ for exp_nber=1:1 % size(p_values.ses,1)
         
                 stim_values=[stim_values current_stim_value];
                 baseline_values=[baseline_values current_baseline_value];
-                pvalue_trial(ch,tr)=pval_randomshuffle([stim_values' baseline_values'],1000);
-                
+                pvalue_trial{ch,tr}=pval_randomshuffle([stim_values' baseline_values'],1000);
+                p_values.channels{end,tr+1}=pvalue_trial{ch,tr};
             end
-            
+%             pvalue_trial_cell = num2cell(pvalue_trial);
+%             p_values.channels{end,2:num_trials+1}= pvalue_trial_cell;
         end
+%         pvalue_trial_rows = size(pvalue_trial,1);
         
-        p_values.channels{end+1,2:num_trials+1}=pvalue_trial;
         trial(1:num_trials)="trial ";
         num = string(1:num_trials);
         trial_names=append(trial,num);
@@ -134,9 +135,11 @@ for exp_nber=1:1 % size(p_values.ses,1)
     figure("Name",p_values.ses{exp_nber})
     pvalues_trial= cell2mat(p_values.channels(:,2:end));
     plot(1:num_trials, pvalues_trial)
-    leg = string(p_values.channels(:,1));
-    legend(leg);
-    title(p_values.ses{exp_nber})
+    leg = string(p_values.channels(1:end,1));
+    leg_edited = replace(leg,'_','.');
+    legend(leg_edited);
+    title_updated = replace(p_values.ses{exp_nber},'_','.');
+    title(title_updated)
     xlabel("number of trials")
     ylabel("p-value")
 
