@@ -117,21 +117,12 @@ for exp_nber=1:1 % size(p_values.ses,1)
         trial(1:num_trials)="trial ";
         num = string(1:num_trials);
         trial_names=append(trial,num);
-    %     pvalue_trial_con = pvalue_trial(con,:,:);
-%         pvalue_trial_table=array2table(pvalue_trial,'RowNames',p_value_sig_condition_of_interest_soz_chs(:),'VariableNames', trial_names); %make matrix into table
-%         p_value_sig_condition_of_interest_soz_chs_trials = p_values.channels{ch,:};
-%         p_values.conditions{2,con}{ch}=pvalue_trial;
-        % plot
+
    
     
     end
     %% Save session csv and plot
-%         zscore_table=array2table(zscore_table,'RowNames',PSD_results.label,'VariableNames',conditions_of_interest); %make matrix into table
-%         writetable(zscore_table,[fnames.analysis_folder,'/LFP/static_ent/LFP_zscore_table_ref' ref_method{:} '.csv'],'WriteRowNames',1);
-%         
-%         pvalue_table=array2table(pvalue_table,'RowNames',PSD_results.label,'VariableNames',conditions_of_interest); %make matrix into table
-%         writetable(pvalue_table,[fnames.analysis_folder,'/LFP/static_ent/LFP_pvalue_table_ref' ref_method{:} '.csv'],'WriteRowNames',1);
-%    
+
     figure("Name",p_values.ses{exp_nber})
     pvalues_trial= cell2mat(p_values.channels(:,2:end));
     plot(1:num_trials, pvalues_trial)
@@ -142,10 +133,16 @@ for exp_nber=1:1 % size(p_values.ses,1)
     title(title_updated)
     xlabel("number of trials")
     ylabel("p-value")
-
-    colNames = {p_values.conditions(1,:)};
+    colNames = {};
+    colNames = {['channel'; trial_names']};
+    p_values_table = cell2table(p_values.channels, "VariableNames", colNames{:});
+    file_path = [root_dir 'stg-analyses\task-' sessions{exp_nber,'task'}{:}...
+        '\sub-' sessions{exp_nber,'sub'}{:} '\ses-' sessions{exp_nber,'ses'}{:}...
+        ,'\LFP\static_ent\LFP_pvalue_trial_table_refLaplacian.csv'];
+    writetable(p_values_table,file_path,'WriteRowNames',1);
+    
 end
 
 
-% writetable(pvalue_trial_table,[fnames.analysis_folder,'/LFP/static_ent/LFP_pvalue_trial_table_refLaplacian.csv'],'WriteRowNames',1);
+
        
