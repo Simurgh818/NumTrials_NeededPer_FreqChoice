@@ -67,6 +67,7 @@ for exp_nber=1:1 % size(p_values.ses,1)
     num_trials=size(PSD_results.data{1,10}{1,1},1);
 
     p_values.channels = {};
+
     for con=1:size(conditions_of_interest,2) %for each condition
         %for each condition: join session and condition info into a
         %cell variable
@@ -83,7 +84,7 @@ for exp_nber=1:1 % size(p_values.ses,1)
         p_value_rows=matches(p_value_sig_condition_of_interest.Row,psd_results_soz_ch,'IgnoreCase',true);
         p_value_sig_condition_of_interest_soz = p_value_sig_condition_of_interest(p_value_rows,:);
         p_value_sig_condition_of_interest_soz_chs = p_value_sig_condition_of_interest_soz.Row(:);
-        pvalue_trial={zeros(size(p_value_sig_condition_of_interest_soz_chs,1),10,num_trials)}; 
+        pvalue_trial={zeros(size(p_value_sig_condition_of_interest_soz_chs,1),num_trials)}; 
     
         % find the index of PSD_results.labels that corespond to the chs with
         % significant p-values in soz
@@ -92,11 +93,12 @@ for exp_nber=1:1 % size(p_values.ses,1)
         idx_PSD_results_label_sig_soz_ch = find(selected_PSD_result_chs);
         channels(1: size(PSD_results_label_sig_soz_chs,1),1) = {p_values.conditions(con)};
 %         p_values.channels = {zeros(size(p_value_sig_condition_of_interest_soz_chs,1),num_trials+1)};
-        
+        p_values.channels.labels = {};
+        p_values.channels.run = {};
 
         for ch = 1:size(PSD_results_label_sig_soz_chs,1)
 %             disp(ch)
-            p_values.channels{end+1,1,1} = {strjoin([channels{ch},PSD_results_label_sig_soz_chs{ch}],'_')};
+            p_values.channels.labels{end+1,1} = {strjoin([channels{ch},PSD_results_label_sig_soz_chs{ch}],'_')};
             stim_values=[];
             baseline_values=[];
             for iteration=1:10
@@ -109,10 +111,12 @@ for exp_nber=1:1 % size(p_values.ses,1)
             
                     stim_values=[stim_values current_stim_value];
                     baseline_values=[baseline_values current_baseline_value];
-                    pvalue_trial{ch,iteration,tr}=pval_randomshuffle([stim_values' baseline_values'],1000);
-                    p_values.channels{end,iteration,tr+1}=pvalue_trial{ch,iteration,tr};
+                    pvalue_trial{ch,tr}=pval_randomshuffle([stim_values' baseline_values'],500);
+                    p_values.channels.run{iteration,tr}=pvalue_trial{ch,tr};
                 end
             end
+            % TODO: calculate Mean and std dev per channel
+%             p_values.channels{end,2:16} = 
 %             pvalue_trial_cell = num2cell(pvalue_trial);
 %             p_values.channels{end,2:num_trials+1}= pvalue_trial_cell;
         end
@@ -126,6 +130,7 @@ for exp_nber=1:1 % size(p_values.ses,1)
     
     end
     %% Save session csv and plot
+    % calculate the mean and std dev for the 10 shuffles and plot them
 
     figure("Name",p_values.ses{exp_nber})
     pvalues_trial= cell2mat(p_values.channels(:,2:end));
@@ -141,9 +146,9 @@ for exp_nber=1:1 % size(p_values.ses,1)
     colNames = {['channel'; trial_names']};
     p_values_table = cell2table(p_values.channels, "VariableNames", colNames{:});
 %     Make a new subfolder or completely different folder, save per session
-    file_path = [root_dir 'stg-analyses\task-' sessions{exp_nber,'task'}{:}...
-        '\sub-' sessions{exp_nber,'sub'}{:} '\ses-' sessions{exp_nber,'ses'}{:}...
-        ,'\LFP\static_ent\LFP_pvalue_trial_table_refLaplacian.csv'];
+    file_path = [root_dir '\Sina\stg-analyses\num_trial_per_freq_choice' ...
+        sessions{exp_nber,'sub'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
+        ,'_LFP_pvalue_trial_table_refLaplacian.csv'];
     writetable(p_values_table,file_path,'WriteRowNames',1);
     % PSD plots condition vs. baseline
 
