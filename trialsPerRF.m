@@ -67,6 +67,10 @@ for exp_nber=1:1 % size(p_values.ses,1)
     num_trials=size(PSD_results.data{1,10}{1,1},1);
 
     p_values.channels = {};
+    p_values.channels.labels = {};
+    p_values.channels.run = {};
+    p_values.channels.means =[];
+    p_values.channels.stdDev =[];
 
     for con=1:size(conditions_of_interest,2) %for each condition
         %for each condition: join session and condition info into a
@@ -93,9 +97,7 @@ for exp_nber=1:1 % size(p_values.ses,1)
         idx_PSD_results_label_sig_soz_ch = find(selected_PSD_result_chs);
         channels(1: size(PSD_results_label_sig_soz_chs,1),1) = {p_values.conditions(con)};
 %         p_values.channels = {zeros(size(p_value_sig_condition_of_interest_soz_chs,1),num_trials+1)};
-        p_values.channels.labels = {};
-        p_values.channels.run = {};
-        p_values.channels.means =[];
+     
 
         for ch = 1:size(PSD_results_label_sig_soz_chs,1)
 %             disp(ch)
@@ -104,8 +106,8 @@ for exp_nber=1:1 % size(p_values.ses,1)
             baseline_values=[];
             for iteration=1:1 %0
 
-%                 trial_order= randperm(num_trials);
-                trial_order = 1:15;
+                trial_order= randperm(num_trials);
+%                 trial_order = 1:15;
                 for tr=trial_order %for however many number of trials of given condition there are
                     
                     current_stim_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),freq_interest_index}{1,1}(tr,:);
@@ -124,7 +126,9 @@ for exp_nber=1:1 % size(p_values.ses,1)
             pvalues_trial_mat = cell2mat(p_values.channels.run(ch,:));
             pvalues_trial_mat_reshape = reshape(pvalues_trial_mat,[w, num_trials]);            
             pvalue_trial_mean = mean(pvalues_trial_mat_reshape,1);
-            p_values.channels.means(ch,1:num_trials)= pvalue_trial_mean;
+            pvalue_trial_stdDev = std(pvalues_trial_mat_reshape,1);
+            p_values.channels.means(end+1,1:num_trials)= pvalue_trial_mean;
+            p_values.channels.stdDev(end+1,1:num_trials) = pvalue_trial_stdDev;
         end
         
         trial(1:num_trials)="trial ";
@@ -134,10 +138,18 @@ for exp_nber=1:1 % size(p_values.ses,1)
     end
     %% Save session csv and plot
     % calculate the mean and std dev for the 10 shuffles and plot them
-   
-
+%     mean_plus_stdDev = p_values.channels.means + p_values.channels.stdDev;
+%     mean_minus_stdDev = p_values.channels.means - p_values.channels.stdDev;
+%     inBetween = [mean_plus_stdDev, fliplr(mean_minus_stdDev)];
+%     x2= [1:num_trials, fliplr(1:num_trials)];
     figure("Name",p_values.ses{exp_nber})
-    plot(1:num_trials, p_values.channels.means)
+    hold on
+%     [n, m ]=size(p_values.channels.means);
+%     colors = hsv(n);
+    plot(1:num_trials, p_values.channels.means);
+%     set(h,{'color'},num2cell(colors,2));
+%     fill(x2, inBetween,'g');
+    errorbar(p_values.channels.means,p_values.channels.stdDev)
     leg = string(p_values.channels.labels(1:end,1));
     leg_edited = replace(leg,'_','.');
     legend(leg_edited);
@@ -145,13 +157,18 @@ for exp_nber=1:1 % size(p_values.ses,1)
     title(title_updated)
     xlabel("number of trials")
     ylabel("p-value")
+    hold off
 
     p_values_table = array2table(p_values.channels.means ,'RowNames',leg, 'VariableNames', trial_names');%"VariableNames", {colNames},
 %     Make a new subfolder or completely different folder, save per session
-    file_path = [root_dir 'Sina\stg-analyses\num_trial_per_freq_choice-' ...
-        sessions{exp_nber,'sub'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
-        ,'_LFP_pvalue_trial_table_refLaplacian.csv'];
-    writetable(p_values_table,file_path,'WriteRowNames',1);
+    file_path = fullfile([root_dir 'Sina\stg-analyses\num_trial_per_freq_choice\'], ...
+        [sessions{exp_nber,'sub'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
+        '_LFP_pvalue_trial_table_refLaplacian.csv']);
+    if exist(file_path,"file")
+        writetable(p_values_table,file_path,'WriteRowNames',1);
+    else
+        disp("File path not found!")
+    end
     % PSD plots condition vs. baseline
 
 end
