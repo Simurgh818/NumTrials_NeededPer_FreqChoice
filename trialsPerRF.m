@@ -84,7 +84,7 @@ for exp_nber=1:1 % size(p_values.ses,1)
         p_value_rows=matches(p_value_sig_condition_of_interest.Row,psd_results_soz_ch,'IgnoreCase',true);
         p_value_sig_condition_of_interest_soz = p_value_sig_condition_of_interest(p_value_rows,:);
         p_value_sig_condition_of_interest_soz_chs = p_value_sig_condition_of_interest_soz.Row(:);
-        pvalue_trial={zeros(size(p_value_sig_condition_of_interest_soz_chs,1),num_trials)}; 
+        pvalue_trial=zeros(size(p_value_sig_condition_of_interest_soz_chs,1),num_trials); 
     
         % find the index of PSD_results.labels that corespond to the chs with
         % significant p-values in soz
@@ -95,13 +95,14 @@ for exp_nber=1:1 % size(p_values.ses,1)
 %         p_values.channels = {zeros(size(p_value_sig_condition_of_interest_soz_chs,1),num_trials+1)};
         p_values.channels.labels = {};
         p_values.channels.run = {};
+        p_values.channels.means =[];
 
         for ch = 1:size(PSD_results_label_sig_soz_chs,1)
 %             disp(ch)
             p_values.channels.labels{end+1,1} = {strjoin([channels{ch},PSD_results_label_sig_soz_chs{ch}],'_')};
             stim_values=[];
             baseline_values=[];
-            for iteration=1:2 %0
+            for iteration=1:1 %0
 
 %                 trial_order= randperm(num_trials);
                 trial_order = 1:15;
@@ -112,35 +113,31 @@ for exp_nber=1:1 % size(p_values.ses,1)
             
                     stim_values=[stim_values current_stim_value];
                     baseline_values=[baseline_values current_baseline_value];
-                    pvalue_trial{ch,tr}=pval_randomshuffle([stim_values' baseline_values'],500);
+                    pvalue_trial(ch,tr)=pval_randomshuffle([stim_values' baseline_values'],500);
                     
                 end
                 p_values.channels.run{ch,iteration}=pvalue_trial(ch,:);
             end
           
-            
             % TODO: calculate Mean and std dev per channel
-%             p_values.channels{end,2:16} = 
-%             pvalue_trial_cell = num2cell(pvalue_trial);
-%             p_values.channels{end,2:num_trials+1}= pvalue_trial_cell;
+            [l, w ] = size(p_values.channels.run(ch,:));
+            pvalues_trial_mat = cell2mat(p_values.channels.run(ch,:));
+            pvalues_trial_mat_reshape = reshape(pvalues_trial_mat,[w, num_trials]);            
+            pvalue_trial_mean = mean(pvalues_trial_mat_reshape,1);
+            p_values.channels.means(ch,1:num_trials)= pvalue_trial_mean;
         end
-%         pvalue_trial_rows = size(pvalue_trial,1);
         
         trial(1:num_trials)="trial ";
         num = string(1:num_trials);
         trial_names=append(trial,num);
-
-   
     
     end
     %% Save session csv and plot
     % calculate the mean and std dev for the 10 shuffles and plot them
-    pvalues_trial= cell2mat(p_values.channels.run);
-    pvalue_trial_mean = mean(pvalues_trial,2);
-    [l, w, h] = size(pvalue_trial_mean);
-    pvalue_trial_mean = reshape(pvalue_trial_mean,[l, h]);
+   
+
     figure("Name",p_values.ses{exp_nber})
-    plot(1:num_trials, pvalue_trial_mean)
+    plot(1:num_trials, p_values.channels.means)
     leg = string(p_values.channels.labels(1:end,1));
     leg_edited = replace(leg,'_','.');
     legend(leg_edited);
@@ -148,12 +145,10 @@ for exp_nber=1:1 % size(p_values.ses,1)
     title(title_updated)
     xlabel("number of trials")
     ylabel("p-value")
-    colNames = {};
-    colNames = {['channel'; trial_names']};
-%     pvalue_trial_mean_labeled = append(leg, pvalue_trial_mean,2);
-    p_values_table = table(p_values.channels.labels ,pvalue_trial_mean,"VariableNames", colNames{:});
+
+    p_values_table = array2table(p_values.channels.means ,'RowNames',leg, 'VariableNames', trial_names');%"VariableNames", {colNames},
 %     Make a new subfolder or completely different folder, save per session
-    file_path = [root_dir '\Sina\stg-analyses\num_trial_per_freq_choice' ...
+    file_path = [root_dir 'Sina\stg-analyses\num_trial_per_freq_choice-' ...
         sessions{exp_nber,'sub'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
         ,'_LFP_pvalue_trial_table_refLaplacian.csv'];
     writetable(p_values_table,file_path,'WriteRowNames',1);
