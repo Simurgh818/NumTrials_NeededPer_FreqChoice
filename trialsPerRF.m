@@ -104,7 +104,7 @@ for exp_nber=1:1 % size(p_values.ses,1)
             p_values.channels.labels{end+1,1} = {strjoin([channels{ch},PSD_results_label_sig_soz_chs{ch}],'_')};
             stim_values=[];
             baseline_values=[];
-            for iteration=1:1 %0
+            for iteration=1:10 %0
 
                 trial_order= randperm(num_trials);
 %                 trial_order = 1:15;
@@ -158,14 +158,16 @@ for exp_nber=1:1 % size(p_values.ses,1)
     xlabel("number of trials")
     ylabel("p-value")
     hold off
+%% Save p_values as .mat file
 
     p_values_table = array2table(p_values.channels.means ,'RowNames',leg, 'VariableNames', trial_names');%"VariableNames", {colNames},
-%     Make a new subfolder or completely different folder, save per session
-    file_path = fullfile([root_dir 'Sina\stg-analyses\num_trial_per_freq_choice\'], ...
+    
+    file_path = fullfile([root_dir 'Sina\stg-analysis\num_trial_per_freq_choice\'], ...
         [sessions{exp_nber,'sub'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
-        '_LFP_pvalue_trial_table_refLaplacian.csv']);
+        '_LFP_pvalue_trial_table_refLaplacian.mat']);
     if exist(file_path,"file")
-        writetable(p_values_table,file_path,'WriteRowNames',1);
+%         writetable(p_values_table,file_path,'WriteRowNames',1);
+        save(file_path,'-struct','p_values');
     else
         disp("File path not found!")
     end
@@ -173,9 +175,9 @@ for exp_nber=1:1 % size(p_values.ses,1)
 
 end
 
-figure
-plot_PSD('80Hz-AV','1Ld5-1Ld4/1Ld6',PSD_results,PSD_results.label,PSD_results.condition,condition_color('80Hz-AV'),0,1,1)% the 0 is for std dev 
-hold on;
-plot_PSD('Baseline','1Ld5-1Ld4/1Ld6',PSD_results,PSD_results.label,PSD_results.condition,[0 0 0],1,0,1)
-hold off;
+% figure
+% plot_PSD('80Hz-AV','1Ld5-1Ld4/1Ld6',PSD_results,PSD_results.label,PSD_results.condition,condition_color('80Hz-AV'),0,1,1)% the 0 is for std dev 
+% hold on;
+% plot_PSD('Baseline','1Ld5-1Ld4/1Ld6',PSD_results,PSD_results.label,PSD_results.condition,[0 0 0],1,0,1)
+% hold off;
        
