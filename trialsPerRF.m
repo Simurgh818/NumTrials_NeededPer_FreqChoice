@@ -101,9 +101,10 @@ for exp_nber=1:1 % size(p_values.ses,1)
             p_values.channels.labels{end+1,1} = {strjoin([channels{ch},PSD_results_label_sig_soz_chs{ch}],'_')};
             stim_values=[];
             baseline_values=[];
-            for iteration=1:10
+            for iteration=1:2 %0
 
-                trial_order= randperm(num_trials);
+%                 trial_order= randperm(num_trials);
+                trial_order = 1:15;
                 for tr=trial_order %for however many number of trials of given condition there are
                     
                     current_stim_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),freq_interest_index}{1,1}(tr,:);
@@ -112,9 +113,12 @@ for exp_nber=1:1 % size(p_values.ses,1)
                     stim_values=[stim_values current_stim_value];
                     baseline_values=[baseline_values current_baseline_value];
                     pvalue_trial{ch,tr}=pval_randomshuffle([stim_values' baseline_values'],500);
-                    p_values.channels.run{iteration,tr}=pvalue_trial{ch,tr};
+                    
                 end
+                p_values.channels.run{ch,iteration}=pvalue_trial(ch,:);
             end
+          
+            
             % TODO: calculate Mean and std dev per channel
 %             p_values.channels{end,2:16} = 
 %             pvalue_trial_cell = num2cell(pvalue_trial);
@@ -131,11 +135,13 @@ for exp_nber=1:1 % size(p_values.ses,1)
     end
     %% Save session csv and plot
     % calculate the mean and std dev for the 10 shuffles and plot them
-
+    pvalues_trial= cell2mat(p_values.channels.run);
+    pvalue_trial_mean = mean(pvalues_trial,2);
+    [l, w, h] = size(pvalue_trial_mean);
+    pvalue_trial_mean = reshape(pvalue_trial_mean,[l, h]);
     figure("Name",p_values.ses{exp_nber})
-    pvalues_trial= cell2mat(p_values.channels(:,2:end));
-    plot(1:num_trials, pvalues_trial)
-    leg = string(p_values.channels(1:end,1));
+    plot(1:num_trials, pvalue_trial_mean)
+    leg = string(p_values.channels.labels(1:end,1));
     leg_edited = replace(leg,'_','.');
     legend(leg_edited);
     title_updated = replace(p_values.ses{exp_nber},'_','.');
@@ -144,7 +150,8 @@ for exp_nber=1:1 % size(p_values.ses,1)
     ylabel("p-value")
     colNames = {};
     colNames = {['channel'; trial_names']};
-    p_values_table = cell2table(p_values.channels, "VariableNames", colNames{:});
+%     pvalue_trial_mean_labeled = append(leg, pvalue_trial_mean,2);
+    p_values_table = table(p_values.channels.labels ,pvalue_trial_mean,"VariableNames", colNames{:});
 %     Make a new subfolder or completely different folder, save per session
     file_path = [root_dir '\Sina\stg-analyses\num_trial_per_freq_choice' ...
         sessions{exp_nber,'sub'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
