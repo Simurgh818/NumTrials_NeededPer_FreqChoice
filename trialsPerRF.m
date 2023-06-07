@@ -16,7 +16,7 @@ root_dir='Y:\';
 %[subjectIDs,sessions]=fetch_flicker_subjectIDs(root_dir,'all');
 p_values.ses = join([sessions.sub,sessions.ses],'_',2);
 % TODO: set up a loop to go through all experiment runs
-for exp_nber=1:3 %size(p_values.ses,1)
+for exp_nber=1:size(p_values.ses,1)
     disp("Processing session data: " + sessions{exp_nber,'sub'}{:} + '_ses-'...
         + sessions{exp_nber,'ses'}{:});
     %get soz channels:
@@ -169,7 +169,6 @@ for exp_nber=1:3 %size(p_values.ses,1)
         [sessions{exp_nber,'sub'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
         '_LFP_pvalue_trial_table_refLaplacian.png']);
     if exist(file_path,"file")
-%         writetable(p_values_table,file_path,'WriteRowNames',1);
         save(file_path,'-struct','p_values');
         saveas(gcf,fig_path);
         disp("Results saved as .mat and .png");
