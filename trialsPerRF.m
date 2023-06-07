@@ -16,7 +16,7 @@ root_dir='Y:\';
 %[subjectIDs,sessions]=fetch_flicker_subjectIDs(root_dir,'all');
 p_values.ses = join([sessions.sub,sessions.ses],'_',2);
 % TODO: set up a loop to go through all experiment runs
-for exp_nber=1:1 % size(p_values.ses,1)
+for exp_nber=1:3 %size(p_values.ses,1)
     
     %get soz channels:
     fnames=struct;
@@ -105,8 +105,8 @@ for exp_nber=1:1 % size(p_values.ses,1)
             baseline_values=[];
             for iteration=1:10 
 
-%                 trial_order= randperm(num_trials);
-                trial_order = 1:15;
+                trial_order= randperm(num_trials);
+%                 trial_order = 1:15;
                 for tr=trial_order %for however many number of trials of given condition there are
                     
                     current_stim_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),freq_interest_index}{1,1}(tr,:);
