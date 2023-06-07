@@ -96,18 +96,17 @@ for exp_nber=1:1 % size(p_values.ses,1)
         PSD_results_label_sig_soz_chs = PSD_results.label(selected_PSD_result_chs);
         idx_PSD_results_label_sig_soz_ch = find(selected_PSD_result_chs);
         channels(1: size(PSD_results_label_sig_soz_chs,1),1) = {p_values.conditions(con)};
-%         p_values.channels = {zeros(size(p_value_sig_condition_of_interest_soz_chs,1),num_trials+1)};
-     
+   
 
         for ch = 1:size(PSD_results_label_sig_soz_chs,1)
 %             disp(ch)
             p_values.channels.labels{end+1,1} = {strjoin([channels{ch},PSD_results_label_sig_soz_chs{ch}],'_')};
             stim_values=[];
             baseline_values=[];
-            for iteration=1:10 %0
+            for iteration=1:10 
 
-                trial_order= randperm(num_trials);
-%                 trial_order = 1:15;
+%                 trial_order= randperm(num_trials);
+                trial_order = 1:15;
                 for tr=trial_order %for however many number of trials of given condition there are
                     
                     current_stim_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),freq_interest_index}{1,1}(tr,:);
@@ -115,7 +114,7 @@ for exp_nber=1:1 % size(p_values.ses,1)
             
                     stim_values=[stim_values current_stim_value];
                     baseline_values=[baseline_values current_baseline_value];
-                    pvalue_trial(ch,tr)=pval_randomshuffle([stim_values' baseline_values'],500);
+                    pvalue_trial(ch,tr)=pval_randomshuffle([stim_values' baseline_values'],250);
                     
                 end
                 p_values.channels.run{ch,iteration}=pvalue_trial(ch,:);
@@ -165,9 +164,13 @@ for exp_nber=1:1 % size(p_values.ses,1)
     file_path = fullfile([root_dir 'Sina\stg-analysis\num_trial_per_freq_choice\'], ...
         [sessions{exp_nber,'sub'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
         '_LFP_pvalue_trial_table_refLaplacian.mat']);
+    fig_path = fullfile([root_dir 'Sina\stg-analysis\num_trial_per_freq_choice\'], ...
+        [sessions{exp_nber,'sub'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
+        '_LFP_pvalue_trial_table_refLaplacian.png']);
     if exist(file_path,"file")
 %         writetable(p_values_table,file_path,'WriteRowNames',1);
         save(file_path,'-struct','p_values');
+        saveas(gcf,fig_path);
     else
         disp("File path not found!")
     end
