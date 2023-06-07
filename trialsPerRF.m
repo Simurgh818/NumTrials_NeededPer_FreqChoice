@@ -74,8 +74,7 @@ for exp_nber=1:size(p_values.ses,1)
     p_values.channels.stdDev =[];
 
     for con=1:size(conditions_of_interest,2) %for each condition
-        %for each condition: join session and condition info into a
-        %cell variable
+        disp("Processing condition: " + conditions_of_interest{con});
         p_values.conditions(con) = {join([p_values.ses{exp_nber},'_',conditions_of_interest{con}],2)};
         freq_interest_boolean=strcmp(PSD_results.condition,conditions_of_interest{con}); %find index of frequency closest to frequency of interest- have to do this because sample rate of EDF file not an integer sometimes (error with Natus)
         freq_interest_index=find(freq_interest_boolean);
@@ -134,7 +133,7 @@ for exp_nber=1:size(p_values.ses,1)
         trial(1:num_trials)="trial ";
         num = string(1:num_trials);
         trial_names=append(trial,num);
-    
+        disp("----------");
     end
     %% Save session csv and plot
     % calculate the mean and std dev for the 10 shuffles and plot them
