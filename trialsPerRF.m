@@ -17,7 +17,8 @@ root_dir='Y:\';
 p_values.ses = join([sessions.sub,sessions.ses],'_',2);
 % TODO: set up a loop to go through all experiment runs
 for exp_nber=1:3 %size(p_values.ses,1)
-    
+    disp("Processing session data: " + sessions{exp_nber,'sub'}{:} + '_ses-'...
+        + sessions{exp_nber,'ses'}{:});
     %get soz channels:
     fnames=struct;
     fnames.root_dir=root_dir;
@@ -99,12 +100,12 @@ for exp_nber=1:3 %size(p_values.ses,1)
    
 
         for ch = 1:size(PSD_results_label_sig_soz_chs,1)
-%             disp(ch)
+            disp("Processing channel: " + PSD_results_label_sig_soz_chs{ch});
             p_values.channels.labels{end+1,1} = {strjoin([channels{ch},PSD_results_label_sig_soz_chs{ch}],'_')};
             stim_values=[];
             baseline_values=[];
             for iteration=1:10 
-
+                disp("Randomized trial run # " + iteration);
                 trial_order= randperm(num_trials);
 %                 trial_order = 1:15;
                 for tr=trial_order %for however many number of trials of given condition there are
@@ -171,6 +172,8 @@ for exp_nber=1:3 %size(p_values.ses,1)
 %         writetable(p_values_table,file_path,'WriteRowNames',1);
         save(file_path,'-struct','p_values');
         saveas(gcf,fig_path);
+        disp("Results saved as .mat and .png");
+        disp("--------------------");
     else
         disp("File path not found!")
     end
