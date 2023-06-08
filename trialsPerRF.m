@@ -11,12 +11,9 @@ close all
 %define root dir (where project data is) and sessions of interest:
 root_dir='Y:\';
 [~,sessions]=fetch_flicker_subjectIDs(root_dir,'flickerneuro');
-%[subjectIDs,sessions]=fetch_flicker_subjectIDs(root_dir,'flickerfreq');
-%[subjectIDs,sessions]=fetch_flicker_subjectIDs(root_dir,'spep');
-%[subjectIDs,sessions]=fetch_flicker_subjectIDs(root_dir,'all');
 p_values.ses = join([sessions.sub,sessions.ses],'_',2);
-% TODO: set up a loop to go through all experiment runs
-for exp_nber=2:size(p_values.ses,1)
+
+for exp_nber=4:size(p_values.ses,1)
     disp("Processing session data: " + sessions{exp_nber,'sub'}{:} + '_ses-'...
         + sessions{exp_nber,'ses'}{:});
     %get soz channels:
@@ -171,7 +168,10 @@ for exp_nber=2:size(p_values.ses,1)
         disp("Results saved as .mat and .png");
         disp("--------------------");
         clear
-        close all 
+        close all
+        root_dir='Y:\';
+        [~,sessions]=fetch_flicker_subjectIDs(root_dir,'flickerneuro');
+        p_values.ses = join([sessions.sub,sessions.ses],'_',2);
     else
         disp("File path not found!")
     end
