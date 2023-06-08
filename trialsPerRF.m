@@ -133,19 +133,11 @@ for exp_nber=1:size(p_values.ses,1)
         trial_names=append(trial,num);
         disp("----------");
     end
-    %% Save session csv and plot
-    % calculate the mean and std dev for the 10 shuffles and plot them
-%     mean_plus_stdDev = p_values.channels.means + p_values.channels.stdDev;
-%     mean_minus_stdDev = p_values.channels.means - p_values.channels.stdDev;
-%     inBetween = [mean_plus_stdDev, fliplr(mean_minus_stdDev)];
-%     x2= [1:num_trials, fliplr(1:num_trials)];
+    %% plotting
+
     figure("Name",p_values.ses{exp_nber})
     hold on
-%     [n, m ]=size(p_values.channels.means);
-%     colors = hsv(n);
     semilogy(1:num_trials, p_values.channels.means);
-%     set(h,{'color'},num2cell(colors,2));
-%     fill(x2, inBetween,'g');
     errorbar(p_values.channels.means,p_values.channels.stdDev)
     leg = string(p_values.channels.labels(1:end,1));
     leg_edited = replace(leg,'_','.');
