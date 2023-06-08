@@ -13,7 +13,7 @@ root_dir='Y:\';
 [~,sessions]=fetch_flicker_subjectIDs(root_dir,'flickerneuro');
 p_values.ses = join([sessions.sub,sessions.ses],'_',2);
 
-for exp_nber=4:size(p_values.ses,1)
+for exp_nber=2:size(p_values.ses,1)
     disp("Processing session data: " + sessions{exp_nber,'sub'}{:} + '_ses-'...
         + sessions{exp_nber,'ses'}{:});
     %get soz channels:
@@ -75,7 +75,8 @@ for exp_nber=4:size(p_values.ses,1)
         p_values.conditions(con) = {join([p_values.ses{exp_nber},'_',conditions_of_interest{con}],2)};
         freq_interest_boolean=strcmp(PSD_results.condition,conditions_of_interest{con}); %find index of frequency closest to frequency of interest- have to do this because sample rate of EDF file not an integer sometimes (error with Natus)
         freq_interest_index=find(freq_interest_boolean);
-    
+        baseline_boolean = strcmp(PSD_results.condition,control_condition);
+        baseline_index = find(baseline_boolean);
         % select the channels with p-value<0.05 for 40 Hz AV (2nd column), for 5.5
         % Hz is column 5 and 80 Hz is column 8
        
@@ -107,7 +108,7 @@ for exp_nber=4:size(p_values.ses,1)
                 for tr=trial_order %for however many number of trials of given condition there are
                     
                     current_stim_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),freq_interest_index}{1,1}(tr,:);
-                    current_baseline_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),2}{1,1}(tr,:);
+                    current_baseline_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),baseline_index}{1,1}(tr,:);
             
                     stim_values=[stim_values current_stim_value];
                     baseline_values=[baseline_values current_baseline_value];
