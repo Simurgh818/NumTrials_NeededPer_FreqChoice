@@ -170,6 +170,8 @@ for exp_nber=2:size(p_values.ses,1)
         saveas(gcf,fig_path);
         disp("Results saved as .mat and .png");
         disp("--------------------");
+        clear
+        close all 
     else
         disp("File path not found!")
     end
