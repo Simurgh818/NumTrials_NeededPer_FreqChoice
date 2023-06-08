@@ -16,7 +16,7 @@ root_dir='Y:\';
 %[subjectIDs,sessions]=fetch_flicker_subjectIDs(root_dir,'all');
 p_values.ses = join([sessions.sub,sessions.ses],'_',2);
 % TODO: set up a loop to go through all experiment runs
-for exp_nber=1:size(p_values.ses,1)
+for exp_nber=2:size(p_values.ses,1)
     disp("Processing session data: " + sessions{exp_nber,'sub'}{:} + '_ses-'...
         + sessions{exp_nber,'ses'}{:});
     %get soz channels:
@@ -160,14 +160,12 @@ for exp_nber=1:size(p_values.ses,1)
 %% Save p_values as .mat file
 
     p_values_table = array2table(p_values.channels.means ,'RowNames',leg, 'VariableNames', trial_names');%"VariableNames", {colNames},
-    
-    file_path = fullfile([root_dir 'Sina\stg-analysis\num_trial_per_freq_choice\'], ...
-        [sessions{exp_nber,'sub'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
+    dir_path = [root_dir 'Sina\stg-analysis\num_trial_per_freq_choice\'];
+    file_path = fullfile(dir_path, [sessions{exp_nber,'sub'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
         '_LFP_pvalue_trial_table_refLaplacian.mat']);
-    fig_path = fullfile([root_dir 'Sina\stg-analysis\num_trial_per_freq_choice\'], ...
-        [sessions{exp_nber,'sub'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
+    fig_path = fullfile(dir_path, [sessions{exp_nber,'sub'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
         '_LFP_pvalue_trial_table_refLaplacian.png']);
-    if exist(file_path,"file")
+    if exist(dir_path,"dir")
         save(file_path,'-struct','p_values');
         saveas(gcf,fig_path);
         disp("Results saved as .mat and .png");
