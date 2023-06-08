@@ -13,7 +13,7 @@ root_dir='Y:\';
 [~,sessions]=fetch_flicker_subjectIDs(root_dir,'flickerneuro');
 p_values.ses = join([sessions.sub,sessions.ses],'_',2);
 
-for exp_nber=2:size(p_values.ses,1)
+for exp_nber=1:size(p_values.ses,1)
     disp("Processing session data: " + sessions{exp_nber,'sub'}{:} + '_ses-'...
         + sessions{exp_nber,'ses'}{:});
     %get soz channels:
