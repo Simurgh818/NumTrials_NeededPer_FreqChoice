@@ -143,17 +143,19 @@ for exp_nber=2:size(p_values.ses,1)
     hold on
 %     [n, m ]=size(p_values.channels.means);
 %     colors = hsv(n);
-    plot(1:num_trials, p_values.channels.means);
+    semilogy(1:num_trials, p_values.channels.means);
 %     set(h,{'color'},num2cell(colors,2));
 %     fill(x2, inBetween,'g');
     errorbar(p_values.channels.means,p_values.channels.stdDev)
     leg = string(p_values.channels.labels(1:end,1));
     leg_edited = replace(leg,'_','.');
-    legend(leg_edited);
+    legend(leg_edited,'Location','southoutside');
     title_updated = replace(p_values.ses{exp_nber},'_','.');
     title(title_updated)
+    xticks(1:1:15)
     xlabel("number of trials")
-    ylabel("p-value")
+    ylabel("p-value (log_{10})")
+    grid on
     hold off
 %% Save p_values as .mat file
 
