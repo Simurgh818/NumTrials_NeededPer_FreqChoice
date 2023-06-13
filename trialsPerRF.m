@@ -13,7 +13,7 @@ root_dir='Y:\';
 [~,sessions]=fetch_flicker_subjectIDs(root_dir,'flickerneuro');
 p_values.ses = join([sessions.sub,sessions.ses],'_',2);
 
-for exp_nber=1:size(p_values.ses,1)
+for exp_nber=8:8 %size(p_values.ses,1)-1
     disp("Processing session data: " + sessions{exp_nber,'sub'}{:} + '_ses-'...
         + sessions{exp_nber,'ses'}{:});
     %get soz channels:
@@ -101,7 +101,7 @@ for exp_nber=1:size(p_values.ses,1)
             p_values.channels.labels{end+1,1} = {strjoin([channels{ch},PSD_results_label_sig_soz_chs{ch}],'_')};
             stim_values=[];
             baseline_values=[];
-            for iteration=1:10 
+            for iteration=1:10
                 disp("Randomized trial run # " + iteration);
                 trial_order= randperm(num_trials);
 %                 trial_order = 1:15;
