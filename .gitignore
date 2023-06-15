@@ -152,3 +152,4 @@ cython_debug/
 #.idea/
 trialsPerRF.asv
 *.csv
+RF-workspace.jupyterlab-workspace
