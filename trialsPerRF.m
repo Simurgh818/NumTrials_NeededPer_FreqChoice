@@ -31,8 +31,9 @@ for exp_nber=8:8 %size(p_values.ses,1)-1
         '\LFP\static_ent\sub-' sessions{exp_nber,'sub'}{:} '_stg-analysis_task-'...
         sessions{exp_nber,'task'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
         '_nat-psd-refLaplacian.mat'];
-    PSD_results=importdata(data);
-    
+%     PSD_results=importdata(data);
+    PSD_resultsObj= matfile(data); 
+    PSD_results = PSD_resultsObj.PSD_results_ref_preproc;   
     %% Get SOZ channels with p-values < 0.05
     
     patho_channels=fetch_channels(fnames,'patho_channels');
@@ -112,7 +113,7 @@ for exp_nber=8:8 %size(p_values.ses,1)-1
             
                     stim_values=[stim_values current_stim_value];
                     baseline_values=[baseline_values current_baseline_value];
-                    pvalue_trial(ch,tr)=pval_randomshuffle([stim_values' baseline_values'],250);
+                    pvalue_trial(ch,tr)=pval_randomshuffle([stim_values' baseline_values'],500);
                     
                 end
                 p_values.channels.run{ch,iteration}=pvalue_trial(ch,:);
