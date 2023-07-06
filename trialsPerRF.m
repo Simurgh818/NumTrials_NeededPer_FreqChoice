@@ -70,6 +70,7 @@ for exp_nber=1:1 %size(p_values.ses,1)-1
     p_values.channels.run = {};
     p_values.channels.means =[];
     p_values.channels.stdDev =[];
+    p_values_comp = table();
 
     for con=1:size(conditions_of_interest,2) %for each condition
         disp("Processing condition: " + conditions_of_interest{con});
@@ -95,7 +96,7 @@ for exp_nber=1:1 %size(p_values.ses,1)-1
         PSD_results_label_sig_soz_chs = PSD_results.label(selected_PSD_result_chs);
         idx_PSD_results_label_sig_soz_ch = find(selected_PSD_result_chs);
         channels(1: size(PSD_results_label_sig_soz_chs,1),1) = {p_values.conditions(con)};
-   
+        
 
         for ch = 1:size(PSD_results_label_sig_soz_chs,1)
             disp("Processing channel: " + PSD_results_label_sig_soz_chs{ch});
@@ -113,7 +114,7 @@ for exp_nber=1:1 %size(p_values.ses,1)-1
             
                     stim_values=[stim_values current_stim_value];
                     baseline_values=[baseline_values current_baseline_value];
-                    pvalue_trial(ch,tr)=pval_randomshuffle([stim_values' baseline_values'],500);
+                    pvalue_trial(ch,tr)=pval_randomshuffle([stim_values' baseline_values'],1000);
                     
                 end
                 p_values.channels.run{ch,iteration}=pvalue_trial(ch,:);
@@ -129,9 +130,9 @@ for exp_nber=1:1 %size(p_values.ses,1)-1
             p_values.channels.stdDev(end+1,1:num_trials) = pvalue_trial_stdDev;
 
             % compare Lou and Sina's trial 15
-            p_values_comp= array2table([p_values.channels.run{1,1}(1,15),...
+            p_values_comp(end+1,:)= array2table([p_values.channels.run{1,1}(1,15),...
                 p_value_sig_condition_of_interest{PSD_results_label_sig_soz_chs{ch},1}]...
-                ,'RowNames',p_values.channels.labels{ch}, 'VariableNames', ["Sina"; "Lou"]');
+                ,'VariableNames', ["Sina"; "Lou"]');
 
         end
         
@@ -169,8 +170,8 @@ for exp_nber=1:1 %size(p_values.ses,1)-1
         saveas(gcf,fig_path);
         disp("Results saved as .mat and .png");
         disp("--------------------");
-        clear
-        close all
+%         clear
+%         close all
         root_dir='Y:\';
         [~,sessions]=fetch_flicker_subjectIDs(root_dir,'flickerneuro');
         p_values.ses = join([sessions.sub,sessions.ses],'_',2);
