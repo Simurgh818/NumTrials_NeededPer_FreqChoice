@@ -133,6 +133,13 @@ for exp_nber=1:1 %size(p_values.ses,1)-1
             p_values_comp(end+1,:)= array2table([p_values.channels.run{1,1}(1,15),...
                 p_value_sig_condition_of_interest{PSD_results_label_sig_soz_chs{ch},1}]...
                 ,'VariableNames', ["Sina"; "Lou"]');
+            
+            % PSD plots condition vs. baseline
+            figure("Name",p_values.channels.labels{end,1}{:} )
+            plot_PSD(conditions_of_interest{con},PSD_results_label_sig_soz_chs{ch},PSD_results,PSD_results.label,PSD_results.condition,condition_color('80Hz-AV'),0,1,1)% the 0 is for std dev 
+            hold on;
+            plot_PSD('Baseline',PSD_results_label_sig_soz_chs{ch},PSD_results,PSD_results.label,PSD_results.condition,[0 0 0],1,0,1)
+            hold off;
 
         end
         
@@ -166,9 +173,9 @@ for exp_nber=1:1 %size(p_values.ses,1)-1
     fig_path = fullfile(dir_path, [sessions{exp_nber,'sub'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
         '_LFP_pvalue_trial_table_refLaplacian.png']);
     if exist(dir_path,"dir")
-        save(file_path,'-struct','p_values');
-        saveas(gcf,fig_path);
-        disp("Results saved as .mat and .png");
+%         save(file_path,'-struct','p_values');
+%         saveas(gcf,fig_path);
+%         disp("Results saved as .mat and .png");
         disp("--------------------");
 %         clear
 %         close all
@@ -178,7 +185,7 @@ for exp_nber=1:1 %size(p_values.ses,1)-1
     else
         disp("File path not found!")
     end
-    % PSD plots condition vs. baseline
+   
 
 end
 
