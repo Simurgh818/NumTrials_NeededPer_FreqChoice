@@ -136,9 +136,12 @@ for exp_nber=1:1 %size(p_values.ses,1)-1
             
             % PSD plots condition vs. baseline
             figure("Name",p_values.channels.labels{end,1}{:} )
-            plot_PSD(conditions_of_interest{con},PSD_results_label_sig_soz_chs{ch},PSD_results,PSD_results.label,PSD_results.condition,condition_color('80Hz-AV'),0,1,1)% the 0 is for std dev 
+            plot_PSD(conditions_of_interest{con},PSD_results_label_sig_soz_chs{ch},PSD_results,PSD_results.label,PSD_results.condition,condition_color('80Hz-AV'),1,0,1)% the 0 is for std dev 
             hold on;
             plot_PSD('Baseline',PSD_results_label_sig_soz_chs{ch},PSD_results,PSD_results.label,PSD_results.condition,[0 0 0],1,0,1)
+            xlabel("freq. (Hz)");
+            ylabel("mean power (log_{10})");
+            legend(["stimulation", "baseline"]);
             hold off;
 
         end
