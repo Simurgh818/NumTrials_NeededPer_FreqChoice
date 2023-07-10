@@ -59,10 +59,10 @@ for exp_nber=1:1 %size(p_values.ses,1)-1
     % check to see after how many trials their p-value became <0.05
     % 
     % evaluate_ent_degree_relpower_perTrial(fnames);
-    conditions_of_interest=sort(PSD_results.condition(contains(PSD_results.condition,'Hz-AV') & ~contains(PSD_results.condition,'occluded') & ~contains(PSD_results.condition,'min')));
+%     conditions_of_interest=sort(PSD_results.condition(contains(PSD_results.condition,'Hz-AV') & ~contains(PSD_results.condition,'occluded') & ~contains(PSD_results.condition,'min')));
     p_values.conditions= {};
     control_condition='Baseline';
-%     conditions_of_interest = {'40Hz-AV'};
+    conditions_of_interest = {'80Hz-AV'};
     num_trials=size(PSD_results.data{1,10}{1,1},1);
 
     p_values.channels = {};
@@ -77,8 +77,10 @@ for exp_nber=1:1 %size(p_values.ses,1)-1
         p_values.conditions(con) = {join([p_values.ses{exp_nber},'_',conditions_of_interest{con}],2)};
         freq_interest_boolean=strcmp(PSD_results.condition,conditions_of_interest{con}); %find index of frequency closest to frequency of interest- have to do this because sample rate of EDF file not an integer sometimes (error with Natus)
         freq_interest_index=find(freq_interest_boolean);
+        disp("freq_interest_index "+ freq_interest_index);
         baseline_boolean = strcmp(PSD_results.condition,control_condition);
         baseline_index = find(baseline_boolean);
+        disp("baseline_condition_index " + baseline_index);
         % select the channels with p-value<0.05 for 40 Hz AV (2nd column), for 5.5
         % Hz is column 5 and 80 Hz is column 8
        
@@ -98,23 +100,23 @@ for exp_nber=1:1 %size(p_values.ses,1)-1
         channels(1: size(PSD_results_label_sig_soz_chs,1),1) = {p_values.conditions(con)};
         
 
-        for ch = 1:size(PSD_results_label_sig_soz_chs,1)
+        for ch = 3:4 % size(PSD_results_label_sig_soz_chs,1)
             disp("Processing channel: " + PSD_results_label_sig_soz_chs{ch});
             p_values.channels.labels{end+1,1} = {strjoin([channels{ch},PSD_results_label_sig_soz_chs{ch}],'_')};
             stim_values=[];
             baseline_values=[];
             for iteration=1:1 %10
                 disp("Randomized trial run # " + iteration);
-                trial_order= randperm(num_trials);
-%                 trial_order = 1:15;
+%                 trial_order= randperm(num_trials);
+                trial_order = 1:15;
                 for tr=trial_order %for however many number of trials of given condition there are
-                    
+                    disp("trial number "+tr);
                     current_stim_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),freq_interest_index}{1,1}(tr,:);
                     current_baseline_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),baseline_index}{1,1}(tr,:);
             
                     stim_values=[stim_values current_stim_value];
                     baseline_values=[baseline_values current_baseline_value];
-                    pvalue_trial(ch,tr)=pval_randomshuffle([stim_values' baseline_values'],1000);
+                    pvalue_trial(ch,tr)=pval_randomshuffle([stim_values' baseline_values'],10000);
                     
                 end
                 p_values.channels.run{ch,iteration}=pvalue_trial(ch,:);
