@@ -13,7 +13,7 @@ root_dir='Y:\';
 [~,sessions]=fetch_flicker_subjectIDs(root_dir,'flickerneuro');
 p_values.ses = join([sessions.sub,sessions.ses],'_',2);
 
-for exp_nber=1:1 %size(p_values.ses,1)-1
+for exp_nber=1:size(p_values.ses,1)-1
     disp("Processing session data: " + sessions{exp_nber,'sub'}{:} + '_ses-'...
         + sessions{exp_nber,'ses'}{:});
     %get soz channels:
@@ -106,7 +106,7 @@ for exp_nber=1:1 %size(p_values.ses,1)-1
             p_values.channels.labels{end+1,1} = {strjoin([channels{ch},PSD_results_label_sig_soz_chs{ch}],'_')};
             stim_values=[];
             baseline_values=[];
-            for iteration=1:1 %10
+            for iteration=1:10
                 disp("Randomized trial run # " + iteration);
 %                 trial_order= randperm(num_trials);
                 trial_order = 1:15;
@@ -132,20 +132,20 @@ for exp_nber=1:1 %size(p_values.ses,1)-1
             p_values.channels.means(end+1,1:num_trials)= pvalue_trial_mean;
             p_values.channels.stdDev(end+1,1:num_trials) = pvalue_trial_stdDev;
 
-            % compare Lou and Sina's trial 15
-            p_values_comp(end+1,:)= array2table([p_values.channels.run{ch,1}(1,15),...
-                p_value_sig_condition_of_interest{PSD_results_label_sig_soz_chs{ch},1}],...
-                'VariableNames', ["Sina"; "Lou"]');
-            
-            % PSD plots condition vs. baseline
-            figure("Name",p_values.channels.labels{end,1}{:} )
-            plot_PSD(conditions_of_interest{con},PSD_results_label_sig_soz_chs{ch},PSD_results,PSD_results.label,PSD_results.condition,condition_color('80Hz-AV'),1,0,1)% the 0 is for std dev 
-            hold on;
-            plot_PSD('Baseline',PSD_results_label_sig_soz_chs{ch},PSD_results,PSD_results.label,PSD_results.condition,[0 0 0],1,0,1)
-            xlabel("freq. (Hz)");
-            ylabel("mean power (log_{10})");
-            legend(["stimulation", "baseline"]);
-            hold off;
+%             % compare Lou and Sina's trial 15
+%             p_values_comp(end+1,:)= array2table([p_values.channels.run{ch,1}(1,15),...
+%                 p_value_sig_condition_of_interest{PSD_results_label_sig_soz_chs{ch},1}],...
+%                 'VariableNames', ["Sina"; "Lou"]');
+%             
+%             % PSD plots condition vs. baseline
+%             figure("Name",p_values.channels.labels{end,1}{:} )
+%             plot_PSD(conditions_of_interest{con},PSD_results_label_sig_soz_chs{ch},PSD_results,PSD_results.label,PSD_results.condition,condition_color('80Hz-AV'),1,0,1)% the 0 is for std dev 
+%             hold on;
+%             plot_PSD('Baseline',PSD_results_label_sig_soz_chs{ch},PSD_results,PSD_results.label,PSD_results.condition,[0 0 0],1,0,1)
+%             xlabel("freq. (Hz)");
+%             ylabel("mean power (log_{10})");
+%             legend(["stimulation", "baseline"]);
+%             hold off;
 
         end
         
@@ -182,12 +182,12 @@ for exp_nber=1:1 %size(p_values.ses,1)-1
     fig_path = fullfile(dir_path, [sessions{exp_nber,'sub'}{:} '_ses-' sessions{exp_nber,'ses'}{:}...
         '_LFP_pvalue_trial_table_refLaplacian.png']);
     if exist(dir_path,"dir")
-%         save(file_path,'-struct','p_values');
-%         saveas(gcf,fig_path);
-%         disp("Results saved as .mat and .png");
+        save(file_path,'-struct','p_values');
+        saveas(gcf,fig_path);
+        disp("Results saved as .mat and .png");
         disp("--------------------");
-%         clear
-%         close all
+        clear PSD_results;
+        close all
         root_dir='Y:\';
         [~,sessions]=fetch_flicker_subjectIDs(root_dir,'flickerneuro');
         p_values.ses = join([sessions.sub,sessions.ses],'_',2);
