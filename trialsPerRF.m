@@ -13,7 +13,7 @@ root_dir='Y:\';
 [~,sessions]=fetch_flicker_subjectIDs(root_dir,'flickerneuro');
 p_values.ses = join([sessions.sub,sessions.ses],'_',2);
 
-for exp_nber=1:3 %size(p_values.ses,1)-1
+for exp_nber=1:size(p_values.ses,1)-1
     disp("Processing session data: " + sessions{exp_nber,'sub'}{:} + '_ses-'...
         + sessions{exp_nber,'ses'}{:});
     %get soz channels:
@@ -122,7 +122,7 @@ for exp_nber=1:3 %size(p_values.ses,1)-1
             
                     stim_values=[stim_values current_stim_value];
                     baseline_values=[baseline_values current_baseline_value];
-                    pvalue_trial(ch,tr)=pval_randomshuffle([stim_values' baseline_values'],1000);
+                    pvalue_trial(ch,tr)=pval_randomshuffle([stim_values' baseline_values'],10000);
                     
                 end
                 p_values.channels.run{ch,iteration}=pvalue_trial(ch,:);
@@ -191,7 +191,7 @@ for exp_nber=1:3 %size(p_values.ses,1)-1
         saveas(gcf,fig_path);
         disp("Results saved as .mat and .png");
         disp("--------------------");
-        clear PSD_results p_values pvalue_trial;
+        clear PSD_results p_values pvalue_trial p_values_comp;
         close all
         root_dir='Y:\';
         [~,sessions]=fetch_flicker_subjectIDs(root_dir,'flickerneuro');
