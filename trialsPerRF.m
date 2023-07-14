@@ -91,7 +91,7 @@ for exp_nber=1:size(p_values.ses,1)-1
         p_value_rows=matches(p_value_sig_condition_of_interest.Row,psd_results_soz_ch,'IgnoreCase',true);
         p_value_sig_condition_of_interest_soz = p_value_sig_condition_of_interest(p_value_rows,:);
         p_value_sig_condition_of_interest_soz_chs = p_value_sig_condition_of_interest_soz.Row(:);
-        pvalue_trial=zeros(size(p_value_sig_condition_of_interest_soz_chs,1),num_trials); 
+        
     
         % find the index of PSD_results.labels that corespond to the chs with
         % significant p-values in soz
@@ -112,6 +112,7 @@ for exp_nber=1:size(p_values.ses,1)-1
             for iteration=1:10
                 stim_values=[];
                 baseline_values=[];
+                pvalue_trial=zeros(size(p_value_sig_condition_of_interest_soz_chs,1),num_trials); 
                 disp("Randomized trial run # " + iteration);
 %                 trial_order= randperm(num_trials);
                 trial_order = 1:num_trials;
@@ -169,7 +170,7 @@ for exp_nber=1:size(p_values.ses,1)-1
     plot(1:num_trials,y_p,"LineStyle","--","LineWidth",2);   
     leg = string(p_values.channels.labels(1:end,1));
     leg_edited = replace(leg,'_','.');
-    legend(leg_edited,'Location','southoutside','FontSize',6);
+    legend(leg_edited,'Location','southoutside','FontSize',6,'NumColumns',2);
     title_updated = replace(p_values.ses{exp_nber},'_','.');
     title(title_updated)
     xticks(1:1:15)
