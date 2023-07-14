@@ -113,8 +113,8 @@ for exp_nber=10:size(p_values.ses,1)-1
                 stim_values=[];
                 baseline_values=[];
                 disp("Randomized trial run # " + iteration);
-%                 trial_order= randperm(num_trials);
-                trial_order = 1:num_trials;
+                trial_order= randperm(num_trials);
+%                 trial_order = 1:num_trials;
                 for tr=trial_order %for however many number of trials of given condition there are
 %                     disp("trial number "+tr);
                     current_stim_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),freq_interest_index}{1,1}(tr,freq_interest_index_tr);
