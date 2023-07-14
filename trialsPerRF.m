@@ -63,7 +63,7 @@ for exp_nber=1:size(p_values.ses,1)-1
     p_values.conditions= {};
     control_condition='Baseline';
 %     conditions_of_interest = {'80Hz-AV'};
-    num_trials=size(PSD_results.data{1,10}{1,1},1);
+    
 
     p_values.channels = {};
     p_values.channels.labels = {};
@@ -74,10 +74,11 @@ for exp_nber=1:size(p_values.ses,1)-1
 
     for con=1:size(conditions_of_interest,2) %for each condition
         disp("Processing condition: " + conditions_of_interest{con});
-        p_values.conditions(con) = {join([p_values.ses{exp_nber},'_',conditions_of_interest{con}],2)};
+        p_values.conditions(con) = conditions_of_interest(con);
         freq_interest_boolean=strcmp(PSD_results.condition,conditions_of_interest{con}); %find index of frequency closest to frequency of interest- have to do this because sample rate of EDF file not an integer sometimes (error with Natus)
         freq_interest_index=find(freq_interest_boolean);
         disp("freq_interest_index "+ freq_interest_index);
+        num_trials=size(PSD_results.data{1,freq_interest_index}{1,1},1);
         baseline_boolean = strcmp(PSD_results.condition,control_condition);
         baseline_index = find(baseline_boolean);
         disp("baseline_condition_index " + baseline_index);
@@ -98,26 +99,29 @@ for exp_nber=1:size(p_values.ses,1)-1
         PSD_results_label_sig_soz_chs = PSD_results.label(selected_PSD_result_chs);
         idx_PSD_results_label_sig_soz_ch = find(selected_PSD_result_chs);
         channels(1: size(PSD_results_label_sig_soz_chs,1),1) = {p_values.conditions(con)};
-        
+        freq_interest=str2num(regexprep(conditions_of_interest{con},'Hz.+',''));
+        [~,temp]=min(abs(PSD_results.data{1,strcmp(PSD_results.condition,conditions_of_interest{con})}{3}-freq_interest)); %find index of frequency closest to frequency of interest- have to do this because sample rate of EDF file not an integer sometimes (error with Natus)
+        freq_interest_index_tr=temp;
 
         for ch = 1:size(PSD_results_label_sig_soz_chs,1)
             disp("Processing channel: " + PSD_results_label_sig_soz_chs{ch});
-            disp("The channel index in PSD_results is row number: " + idx_PSD_results_label_sig_soz_ch(ch));
+%             disp("The channel index in PSD_results is row number: " + idx_PSD_results_label_sig_soz_ch(ch));
             p_values.channels.labels{end+1,1} = {strjoin([channels{ch},PSD_results_label_sig_soz_chs{ch}],'_')};
-            stim_values=[];
-            baseline_values=[];
+
             for iteration=1:10
+                stim_values=[];
+                baseline_values=[];
                 disp("Randomized trial run # " + iteration);
 %                 trial_order= randperm(num_trials);
-                trial_order = 1:15;
+                trial_order = 1:num_trials;
                 for tr=trial_order %for however many number of trials of given condition there are
 %                     disp("trial number "+tr);
-                    current_stim_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),freq_interest_index}{1,1}(tr,:);
-                    current_baseline_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),baseline_index}{1,1}(tr,:);
+                    current_stim_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),freq_interest_index}{1,1}(tr,freq_interest_index_tr);
+                    current_baseline_value=PSD_results.data{idx_PSD_results_label_sig_soz_ch(ch),baseline_index}{1,1}(tr,freq_interest_index_tr);
             
                     stim_values=[stim_values current_stim_value];
                     baseline_values=[baseline_values current_baseline_value];
-                    pvalue_trial(ch,tr)=pval_randomshuffle([stim_values' baseline_values'],500);
+                    pvalue_trial(ch,tr)=pval_randomshuffle([stim_values' baseline_values'],1000);
                     
                 end
                 p_values.channels.run{ch,iteration}=pvalue_trial(ch,:);
@@ -132,10 +136,10 @@ for exp_nber=1:size(p_values.ses,1)-1
             p_values.channels.means(end+1,1:num_trials)= pvalue_trial_mean;
             p_values.channels.stdDev(end+1,1:num_trials) = pvalue_trial_stdDev;
 
-%             % compare Lou and Sina's trial 15
-%             p_values_comp(end+1,:)= array2table([p_values.channels.run{ch,1}(1,15),...
-%                 p_value_sig_condition_of_interest{PSD_results_label_sig_soz_chs{ch},1}],...
-%                 'VariableNames', ["Sina"; "Lou"]');
+            % compare Lou and Sina's trial 15
+            p_values_comp(end+1,:)= array2table([p_values.channels.run{ch,1}(1,num_trials),...
+                p_value_sig_condition_of_interest{PSD_results_label_sig_soz_chs{ch},1}],...
+                'VariableNames', ["Sina"; "Lou"]');
 %             
 %             % PSD plots condition vs. baseline
 %             figure("Name",p_values.channels.labels{end,1}{:} )
@@ -164,7 +168,7 @@ for exp_nber=1:size(p_values.ses,1)-1
     plot(1:num_trials,y_p,"LineStyle","--","LineWidth",2);   
     leg = string(p_values.channels.labels(1:end,1));
     leg_edited = replace(leg,'_','.');
-    legend(leg_edited,'Location','southoutside');
+    legend(leg_edited,'Location','southoutside','FontSize',6);
     title_updated = replace(p_values.ses{exp_nber},'_','.');
     title(title_updated)
     xticks(1:1:15)
