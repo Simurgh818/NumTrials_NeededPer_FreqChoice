@@ -137,10 +137,10 @@ for exp_nber=1:size(p_values.ses,1)-1
             p_values.channels.means(end+1,1:num_trials)= pvalue_trial_mean;
             p_values.channels.stdDev(end+1,1:num_trials) = pvalue_trial_stdDev;
 
-            % compare Lou and Sina's trial 15
-            p_values_comp(end+1,:)= array2table([p_values.channels.run{ch,1}(1,num_trials),...
-                p_value_sig_condition_of_interest{PSD_results_label_sig_soz_chs{ch},1}],...
-                'VariableNames', ["Sina"; "Lou"]');
+%             % compare Lou and Sina's trial 15
+%             p_values_comp(end+1,:)= array2table([p_values.channels.run{ch,1}(1,num_trials),...
+%                 p_value_sig_condition_of_interest{PSD_results_label_sig_soz_chs{ch},1}],...
+%                 'VariableNames', ["Sina"; "Lou"]');
 %             
 %             % PSD plots condition vs. baseline
 %             figure("Name",p_values.channels.labels{end,1}{:} )
