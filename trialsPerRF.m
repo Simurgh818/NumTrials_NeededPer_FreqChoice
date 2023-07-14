@@ -13,7 +13,7 @@ root_dir='Y:\';
 [~,sessions]=fetch_flicker_subjectIDs(root_dir,'flickerneuro');
 p_values.ses = join([sessions.sub,sessions.ses],'_',2);
 
-for exp_nber=1:size(p_values.ses,1)-1
+for exp_nber=10:size(p_values.ses,1)-1
     disp("Processing session data: " + sessions{exp_nber,'sub'}{:} + '_ses-'...
         + sessions{exp_nber,'ses'}{:});
     %get soz channels:
@@ -102,7 +102,8 @@ for exp_nber=1:size(p_values.ses,1)-1
         freq_interest=str2num(regexprep(conditions_of_interest{con},'Hz.+',''));
         [~,temp]=min(abs(PSD_results.data{1,strcmp(PSD_results.condition,conditions_of_interest{con})}{3}-freq_interest)); %find index of frequency closest to frequency of interest- have to do this because sample rate of EDF file not an integer sometimes (error with Natus)
         freq_interest_index_tr=temp;
-
+        trial="";
+        trial_names="";
         for ch = 1:size(PSD_results_label_sig_soz_chs,1)
             disp("Processing channel: " + PSD_results_label_sig_soz_chs{ch});
 %             disp("The channel index in PSD_results is row number: " + idx_PSD_results_label_sig_soz_ch(ch));
