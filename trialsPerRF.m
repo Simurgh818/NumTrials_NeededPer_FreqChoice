@@ -165,8 +165,8 @@ for exp_nber=1:size(p_values.ses,1)-1
 
     figure("Name",p_values.ses{exp_nber})
     hold on
-%     semilogy(1:num_trials, p_values.channels.means');
-    plot(1:num_trials, p_values.channels.means');
+    semilogy(1:num_trials, p_values.channels.means');
+%     plot(1:num_trials, p_values.channels.means');
     errorbar(p_values.channels.means',p_values.channels.stdDev')
     y_p = ones(1,num_trials)*0.05;
     plot(1:num_trials,y_p,"LineStyle","--","LineWidth",2);   
@@ -176,7 +176,7 @@ for exp_nber=1:size(p_values.ses,1)-1
     title_updated = replace(p_values.ses{exp_nber},'_','.');
     title(title_updated)
     xticks(1:1:15)
-%     set(gca, 'YScale', 'log')
+    set(gca, 'YScale', 'log')
     xlabel("number of trials")
     ylabel("p-value (log_{10})")
     grid on
