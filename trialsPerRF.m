@@ -99,21 +99,22 @@ for exp_nber=1:size(p_values.ses,1)-1
         PSD_results_label_sig_soz_chs = PSD_results.label(selected_PSD_result_chs);
         idx_PSD_results_label_sig_soz_ch = find(selected_PSD_result_chs);
         channels(1: size(PSD_results_label_sig_soz_chs,1),1) = {p_values.conditions(con)};
-        freq_interest=str2num(regexprep(conditions_of_interest{con},'Hz.+',''));
+        freq_interest=str2double(regexprep(conditions_of_interest{con},'Hz.+',''));
         [~,temp]=min(abs(PSD_results.data{1,strcmp(PSD_results.condition,conditions_of_interest{con})}{3}-freq_interest)); %find index of frequency closest to frequency of interest- have to do this because sample rate of EDF file not an integer sometimes (error with Natus)
         freq_interest_index_tr=temp;
+        disp("The freq index for the trial in session is: "+freq_interest_index_tr)
         trial="";
         trial_names="";
         for ch = 1:size(PSD_results_label_sig_soz_chs,1)
             disp("Processing channel: " + PSD_results_label_sig_soz_chs{ch});
-%             disp("The channel index in PSD_results is row number: " + idx_PSD_results_label_sig_soz_ch(ch));
+            disp("The channel index in PSD_results is row number: " + idx_PSD_results_label_sig_soz_ch(ch));
             p_values.channels.labels{end+1,1} = {strjoin([channels{ch},PSD_results_label_sig_soz_chs{ch}],'_')};
 
             for iteration=1:10
                 stim_values=[];
                 baseline_values=[];
                 pvalue_trial=zeros(size(p_value_sig_condition_of_interest_soz_chs,1),num_trials); 
-                disp("Randomized trial run # " + iteration);
+%                 disp("Randomized trial run # " + iteration);
 %                 trial_order= randperm(num_trials);
                 trial_order = 1:num_trials;
                 for tr=trial_order %for however many number of trials of given condition there are
@@ -132,7 +133,7 @@ for exp_nber=1:size(p_values.ses,1)-1
             % TODO: calculate Mean and std dev per channel
             [l, w ] = size(p_values.channels.run(ch,:));
             pvalues_trial_mat = cell2mat(p_values.channels.run(ch,:));
-            pvalues_trial_mat_reshape = reshape(pvalues_trial_mat,[w, num_trials]);            
+            pvalues_trial_mat_reshape = transpose(reshape(pvalues_trial_mat,[num_trials, w]));            
             pvalue_trial_mean = mean(pvalues_trial_mat_reshape,1);
             pvalue_trial_stdDev = std(pvalues_trial_mat_reshape,1);
             p_values.channels.means(end+1,1:num_trials)= pvalue_trial_mean;
@@ -145,9 +146,9 @@ for exp_nber=1:size(p_values.ses,1)-1
 %             
 %             % PSD plots condition vs. baseline
 %             figure("Name",p_values.channels.labels{end,1}{:} )
-%             plot_PSD(conditions_of_interest{con},PSD_results_label_sig_soz_chs{ch},PSD_results,PSD_results.label,PSD_results.condition,condition_color('80Hz-AV'),1,0,1)% the 0 is for std dev 
+%             plot_PSD(conditions_of_interest{con},PSD_results_label_sig_soz_chs{ch},PSD_results,PSD_results.label,PSD_results.condition,condition_color('80Hz-AV'),0,1,1)% the 0 is for std dev 
 %             hold on;
-%             plot_PSD('Baseline',PSD_results_label_sig_soz_chs{ch},PSD_results,PSD_results.label,PSD_results.condition,[0 0 0],1,0,1)
+%             plot_PSD('Baseline',PSD_results_label_sig_soz_chs{ch},PSD_results,PSD_results.label,PSD_results.condition,[0 0 0],0,1,1)
 %             xlabel("freq. (Hz)");
 %             ylabel("mean power (log_{10})");
 %             legend(["stimulation", "baseline"]);
@@ -164,7 +165,8 @@ for exp_nber=1:size(p_values.ses,1)-1
 
     figure("Name",p_values.ses{exp_nber})
     hold on
-    semilogy(1:num_trials, p_values.channels.means');
+%     semilogy(1:num_trials, p_values.channels.means');
+    plot(1:num_trials, p_values.channels.means');
     errorbar(p_values.channels.means',p_values.channels.stdDev')
     y_p = ones(1,num_trials)*0.05;
     plot(1:num_trials,y_p,"LineStyle","--","LineWidth",2);   
@@ -174,7 +176,7 @@ for exp_nber=1:size(p_values.ses,1)-1
     title_updated = replace(p_values.ses{exp_nber},'_','.');
     title(title_updated)
     xticks(1:1:15)
-    set(gca, 'YScale', 'log')
+%     set(gca, 'YScale', 'log')
     xlabel("number of trials")
     ylabel("p-value (log_{10})")
     grid on
